@@ -12,10 +12,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class ItemServiceImpl implements ItemService{
+public class ItemServiceImpl implements ItemService {
     private final ModelMapper mapper;
     private final ItemRepository itemRepository;
     private final UserService userService;
+
     @Autowired
     public ItemServiceImpl(ModelMapper mapper, ItemRepository itemRepository, UserService userService) {
         this.mapper = mapper;

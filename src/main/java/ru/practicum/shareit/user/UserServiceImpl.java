@@ -6,13 +6,15 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.AlreadyUsedEmail;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final ModelMapper mapper;
+
     @Autowired
     public UserServiceImpl(UserRepository userRepository, ModelMapper mapper) {
         this.userRepository = userRepository;
@@ -53,6 +55,7 @@ public class UserServiceImpl implements UserService{
     public void deleteUser(long userId) {
         userRepository.deleteUser(userId);
     }
+
     @Override
     public boolean isExistUser(long userId) {
         return userRepository.getUserRepo().containsKey(userId);
@@ -70,13 +73,17 @@ public class UserServiceImpl implements UserService{
         userRepository.getUserRepo().values().stream()
                 .filter(user -> user.getEmail().equals(email))
                 .findFirst()
-                .ifPresent(s -> {throw new AlreadyUsedEmail(email);});
+                .ifPresent(s -> {
+                    throw new AlreadyUsedEmail(email);
+                });
     }
 
     private void isUsedEmail(String email, long userId) {
         userRepository.getUserRepo().values().stream()
                 .filter(user -> user.getEmail().equals(email) && user.getId() != userId)
                 .findFirst()
-                .ifPresent(s -> {throw new AlreadyUsedEmail(email);});
+                .ifPresent(s -> {
+                    throw new AlreadyUsedEmail(email);
+                });
     }
 }

@@ -11,6 +11,7 @@ import java.util.List;
 @RequestMapping("/items")
 public class ItemController {
     private final ItemService itemService;
+
     @Autowired
     public ItemController(ItemService itemService) {
         this.itemService = itemService;
@@ -30,7 +31,7 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public  ItemDto getItemById(@PathVariable long itemId) {
+    public ItemDto getItemById(@PathVariable long itemId) {
         return itemService.getItemById(itemId);
     }
 
