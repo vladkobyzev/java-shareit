@@ -1,8 +1,9 @@
-package ru.practicum.shareit.user;
+package ru.practicum.shareit.user.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.services.UserService;
 
 import javax.validation.Valid;
 import java.util.List;

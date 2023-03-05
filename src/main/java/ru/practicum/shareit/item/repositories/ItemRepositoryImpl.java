@@ -1,4 +1,4 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.item.repositories;
 
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exceptions.InappropriateUser;
@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Repository
-public class ItemRepository {
+public class ItemRepositoryImpl implements ItemRepository {
     private Long countItemId = 0L;
     private final Map<Long, Item> itemRepo = new HashMap<>();
 
@@ -19,13 +19,14 @@ public class ItemRepository {
         return itemRepo;
     }
 
-
+    @Override
     public List<Item> getItems(long userId) {
         return itemRepo.values().stream()
                 .filter(item -> item.getOwner() == userId)
                 .collect(Collectors.toList());
     }
 
+    @Override
     public Item createItem(Item item, long userId) {
         item.setId(++countItemId);
         item.setOwner(userId);
@@ -33,14 +34,17 @@ public class ItemRepository {
         return item;
     }
 
+    @Override
     public Item getItemById(long itemId) {
         return itemRepo.get(itemId);
     }
 
+    @Override
     public void deleteItem(long userId) {
         itemRepo.remove(userId);
     }
 
+    @Override
     public Item updateItem(Item item, long itemId, long userId) {
         Item updatedItem = itemRepo.get(itemId);
         if (updatedItem.getOwner() != userId) {
@@ -59,6 +63,7 @@ public class ItemRepository {
         return updatedItem;
     }
 
+    @Override
     public List<Item> searchItemByText(String text) {
         if (text.isBlank()) {
             return Collections.emptyList();

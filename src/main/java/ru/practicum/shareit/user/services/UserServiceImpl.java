@@ -1,4 +1,4 @@
-package ru.practicum.shareit.user;
+package ru.practicum.shareit.user.services;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -6,24 +6,25 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.AlreadyUsedEmail;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repositories.UserRepositoryImpl;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
-    private final UserRepository userRepository;
+    private final UserRepositoryImpl userRepositoryImpl;
     private final ModelMapper mapper;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, ModelMapper mapper) {
-        this.userRepository = userRepository;
+    public UserServiceImpl(UserRepositoryImpl userRepositoryImpl, ModelMapper mapper) {
+        this.userRepositoryImpl = userRepositoryImpl;
         this.mapper = mapper;
     }
 
     @Override
     public List<UserDto> getAllUsers() {
-        return userRepository.getAllUsers().stream()
+        return userRepositoryImpl.getAllUsers().stream()
                 .map(this::convertUserToDto)
                 .collect(Collectors.toList());
     }
@@ -32,12 +33,12 @@ public class UserServiceImpl implements UserService {
     public UserDto createUser(UserDto userDto) {
         User user = convertDtoToUser(userDto);
         isUsedEmail(user.getEmail());
-        return convertUserToDto(userRepository.createUser(user));
+        return convertUserToDto(userRepositoryImpl.createUser(user));
     }
 
     @Override
     public UserDto getUserById(long userId) {
-        return convertUserToDto(userRepository.getUserById(userId));
+        return convertUserToDto(userRepositoryImpl.getUserById(userId));
     }
 
     @Override
@@ -45,7 +46,7 @@ public class UserServiceImpl implements UserService {
         if (isExistUser(userId)) {
             User user = convertDtoToUser(userDto);
             isUsedEmail(user.getEmail(), userId);
-            return convertUserToDto(userRepository.updateUser(user, userId));
+            return convertUserToDto(userRepositoryImpl.updateUser(user, userId));
         } else {
             throw new RuntimeException();
         }
@@ -53,12 +54,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(long userId) {
-        userRepository.deleteUser(userId);
+        userRepositoryImpl.deleteUser(userId);
     }
 
     @Override
     public boolean isExistUser(long userId) {
-        return userRepository.getUserRepo().containsKey(userId);
+        return userRepositoryImpl.getUserRepo().containsKey(userId);
     }
 
     private User convertDtoToUser(UserDto userDto) {
@@ -70,7 +71,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private void isUsedEmail(String email) {
-        userRepository.getUserRepo().values().stream()
+        userRepositoryImpl.getUserRepo().values().stream()
                 .filter(user -> user.getEmail().equals(email))
                 .findFirst()
                 .ifPresent(s -> {
@@ -79,7 +80,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private void isUsedEmail(String email, long userId) {
-        userRepository.getUserRepo().values().stream()
+        userRepositoryImpl.getUserRepo().values().stream()
                 .filter(user -> user.getEmail().equals(email) && user.getId() != userId)
                 .findFirst()
                 .ifPresent(s -> {
