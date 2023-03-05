@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 @Repository
 public class ItemRepository {
     private Long countItemId = 0L;
-    private Map<Long, Item> itemRepo = new HashMap<>();
+    private final Map<Long, Item> itemRepo = new HashMap<>();
 
     public Map<Long, Item> getItemRepo() {
         return itemRepo;
