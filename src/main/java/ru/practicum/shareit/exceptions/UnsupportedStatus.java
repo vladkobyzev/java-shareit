@@ -1,6 +1,6 @@
 package ru.practicum.shareit.exceptions;
 
-public class UnsupportedStatus extends RuntimeException{
+public class UnsupportedStatus extends RuntimeException {
     private final String reasonPhrase = "Unknown state: UNSUPPORTED_STATUS";
 
     public String getReasonPhrase() {

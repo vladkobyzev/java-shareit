@@ -54,8 +54,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Item getItemById(long itemId) {
-        return itemRepository.findById(itemId).
-                orElseThrow(() -> new EntityNotFound("Item not found: " + itemId));
+        return itemRepository.findById(itemId)
+                .orElseThrow(() -> new EntityNotFound("Item not found: " + itemId));
     }
 
     @Override
@@ -76,13 +76,13 @@ public class ItemServiceImpl implements ItemService {
                 .map(ItemDto::getId).collect(Collectors.toList());
 
         List<BookingDate> allNextBooking = bookingRepository.findAllNextBooking(itemsId, LocalDateTime.now());
-        if(!allNextBooking.isEmpty()) {
+        if (!allNextBooking.isEmpty()) {
             for (int i = 0; i < allNextBooking.size(); i++) {
                 items.get(i).setNextBooking(allNextBooking.get(i));
             }
         }
         List<BookingDate> allLastBooking = bookingRepository.findAllLastBooking(itemsId, LocalDateTime.now());
-        if(!allLastBooking.isEmpty()) {
+        if (!allLastBooking.isEmpty()) {
             for (int i = 0; i < allLastBooking.size(); i++) {
                 items.get(i).setLastBooking(allLastBooking.get(i));
             }

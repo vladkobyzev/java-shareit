@@ -26,7 +26,7 @@ public class BookingServiceImpl implements BookingService {
     private final ItemService itemService;
     private final UserService userService;
     private final ModelMapper mapper;
-    private final static String USER = "USER";
+    private static final String USER = "USER";
 
     @Autowired
     public BookingServiceImpl(BookingRepository bookingRepository,
@@ -37,11 +37,12 @@ public class BookingServiceImpl implements BookingService {
         this.userService = userService;
         this.mapper = mapper;
     }
+
     @Override
     @Transactional(readOnly = true)
     public SentBookingDto getBooking(long bookingId, long userId) {
-        Booking booking = bookingRepository.findById(bookingId).
-                orElseThrow(() -> new EntityNotFound("User not found: " + bookingId));
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new EntityNotFound("User not found: " + bookingId));
         if (booking.getBooker().getId() == userId || booking.getItem().getOwner() == userId) {
             return convertBookingToDto(booking);
         } else {
@@ -74,8 +75,8 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional
     public SentBookingDto updateBookingStatus(long bookingId, String approved, long userId) {
-        Booking booking = bookingRepository.findById(bookingId).
-                orElseThrow(() -> new EntityNotFound("Booking not found"));
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new EntityNotFound("Booking not found"));
         isValidUpdateBookingStatusRequest(booking, userId, bookingId);
         setBookingStatus(booking, approved);
         return convertBookingToDto(bookingRepository.save(booking));
@@ -91,6 +92,7 @@ public class BookingServiceImpl implements BookingService {
             throw new BadRequest("Not valid fields");
         }
     }
+
     private void isValidBookingItemRequest(Item item, Long userId) {
         if (item.getAvailable().equals(false)) {
             throw new ItemIsUnavailable("Item " + item.getId() + "is unavailable");
@@ -99,6 +101,7 @@ public class BookingServiceImpl implements BookingService {
             throw new InappropriateUser("Owner cant booking own item");
         }
     }
+
     private void isValidUpdateBookingStatusRequest(Booking booking, Long userId, Long bookingId) {
         if (booking.getItem().getOwner() != userId) {
             throw new InappropriateUser("Inappropriate User: " + userId);
@@ -107,6 +110,7 @@ public class BookingServiceImpl implements BookingService {
             throw new BookingStatusAlreadySet("Booking status already set: " + bookingId);
         }
     }
+
     private void setBookingStatus(Booking booking, String approved) {
         if (approved.equals("true")) {
             booking.setStatus(BookingStatus.APPROVED);
@@ -114,6 +118,7 @@ public class BookingServiceImpl implements BookingService {
             booking.setStatus((BookingStatus.REJECTED));
         }
     }
+
     private SentBookingDto convertBookingToDto(Booking booking) {
         return mapper.map(booking, SentBookingDto.class);
     }

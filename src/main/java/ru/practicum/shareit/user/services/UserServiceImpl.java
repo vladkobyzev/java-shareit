@@ -30,9 +30,10 @@ public class UserServiceImpl implements UserService {
     public UserDto getUserDtoById(long userId) {
         return convertUserToDto(getUserById(userId));
     }
+
     public User getUserById(long userId) {
-        return userRepository.findById(userId).
-                orElseThrow(() -> new EntityNotFound("User not found: " + userId));
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFound("User not found: " + userId));
     }
 
     @Transactional(readOnly = true)
@@ -86,14 +87,8 @@ public class UserServiceImpl implements UserService {
         return mapper.map(user, UserDto.class);
     }
 
-    private void isUsedEmail(String email) {
-        if(userRepository.existsByEmail(email)) {
-            throw new AlreadyUsedEmail(email);
-        }
-    }
-
     private void isUsedEmail(String email, long userId) {
-        if(userRepository.findByEmail(email).getId() != userId) {
+        if (userRepository.findByEmail(email).getId() != userId) {
             throw new AlreadyUsedEmail(email);
         }
     }
