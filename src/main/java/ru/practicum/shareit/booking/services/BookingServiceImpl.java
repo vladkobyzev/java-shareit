@@ -93,7 +93,7 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    private void isValidBookingItemRequest(Item item, Long userId) {
+    private void isValidBookingItemRequest(Item item, long userId) {
         if (item.getAvailable().equals(false)) {
             throw new ItemIsUnavailable("Item " + item.getId() + "is unavailable");
         }
@@ -102,7 +102,7 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    private void isValidUpdateBookingStatusRequest(Booking booking, Long userId, Long bookingId) {
+    private void isValidUpdateBookingStatusRequest(Booking booking, long userId, long bookingId) {
         if (booking.getItem().getOwner() != userId) {
             throw new InappropriateUser("Inappropriate User: " + userId);
         }
