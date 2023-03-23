@@ -71,24 +71,6 @@ public class ItemServiceImpl implements ItemService {
         return items;
     }
 
-    private void setBookingDate(List<ItemDto> items) {
-        List<Long> itemsId = items.stream()
-                .map(ItemDto::getId).collect(Collectors.toList());
-
-        List<BookingDate> allNextBooking = bookingRepository.findAllNextBooking(itemsId, LocalDateTime.now());
-        if (!allNextBooking.isEmpty()) {
-            for (int i = 0; i < allNextBooking.size(); i++) {
-                items.get(i).setNextBooking(allNextBooking.get(i));
-            }
-        }
-        List<BookingDate> allLastBooking = bookingRepository.findAllLastBooking(itemsId, LocalDateTime.now());
-        if (!allLastBooking.isEmpty()) {
-            for (int i = 0; i < allLastBooking.size(); i++) {
-                items.get(i).setLastBooking(allLastBooking.get(i));
-            }
-        }
-    }
-
     @Override
     @Transactional
     public ItemDto createItem(ItemDto itemDto, long userId) {
@@ -173,6 +155,24 @@ public class ItemServiceImpl implements ItemService {
     public void isExistItem(long itemId) {
         if (!itemRepository.existsById(itemId)) {
             throw new EntityNotFound("Item not found:" + itemId);
+        }
+    }
+
+    private void setBookingDate(List<ItemDto> items) {
+        List<Long> itemsId = items.stream()
+                .map(ItemDto::getId).collect(Collectors.toList());
+
+        List<BookingDate> allNextBooking = bookingRepository.findAllNextBooking(itemsId, LocalDateTime.now());
+        if (!allNextBooking.isEmpty()) {
+            for (int i = 0; i < allNextBooking.size(); i++) {
+                items.get(i).setNextBooking(allNextBooking.get(i));
+            }
+        }
+        List<BookingDate> allLastBooking = bookingRepository.findAllLastBooking(itemsId, LocalDateTime.now());
+        if (!allLastBooking.isEmpty()) {
+            for (int i = 0; i < allLastBooking.size(); i++) {
+                items.get(i).setLastBooking(allLastBooking.get(i));
+            }
         }
     }
 }
