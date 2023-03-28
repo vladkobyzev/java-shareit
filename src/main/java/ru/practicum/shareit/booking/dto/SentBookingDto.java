@@ -12,10 +12,7 @@ public class SentBookingDto {
     private Long id;
     private LocalDateTime start;
     private LocalDateTime end;
-
     private BookingStatus status;
-
     private User booker;
-
     private Item item;
 }

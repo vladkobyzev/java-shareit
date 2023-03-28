@@ -1,6 +1,7 @@
 package ru.practicum.shareit.user.model;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -13,6 +14,7 @@ import java.util.Objects;
 @ToString()
 @Entity
 @Table(name = "users")
+@NoArgsConstructor
 public class User {
     @Id
     @Column(name = "id")
@@ -25,8 +27,6 @@ public class User {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    public User() {
-    }
 
     @Override
     public boolean equals(Object o) {

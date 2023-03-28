@@ -12,6 +12,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/items")
 public class ItemController {
+    private static final String USER_ID = "X-Sharer-User-Id";
     private final ItemService itemService;
 
     @Autowired
@@ -22,12 +23,12 @@ public class ItemController {
 
     @GetMapping("/{itemId}")
     public ItemDto getItemById(@PathVariable long itemId,
-                               @RequestHeader(value = "X-Sharer-User-Id") long userId) {
+                               @RequestHeader(value = USER_ID) long userId) {
         return itemService.getItemDtoById(itemId, userId);
     }
 
     @GetMapping()
-    public List<ItemDto> getItems(@RequestHeader(value = "X-Sharer-User-Id") long userId) {
+    public List<ItemDto> getItems(@RequestHeader(value = USER_ID) long userId) {
         return itemService.getItems(userId);
     }
 
@@ -38,7 +39,7 @@ public class ItemController {
 
 
     @PostMapping()
-    public ItemDto createItem(@RequestHeader(value = "X-Sharer-User-Id") long userId,
+    public ItemDto createItem(@RequestHeader(value = USER_ID) long userId,
                               @Valid @RequestBody ItemDto itemDto) {
         return itemService.createItem(itemDto, userId);
     }
@@ -46,14 +47,14 @@ public class ItemController {
     @PostMapping("/{itemId}/comment")
     public CommentDto createComment(@RequestBody CommentDto commentDto,
                               @PathVariable long itemId,
-                              @RequestHeader(value = "X-Sharer-User-Id") long userId) {
+                              @RequestHeader(value = USER_ID) long userId) {
         return itemService.createComment(commentDto, itemId, userId);
     }
 
     @PatchMapping("/{itemId}")
     public ItemDto updateItem(@PathVariable long itemId,
                               @RequestBody ItemDto itemDto,
-                              @RequestHeader(value = "X-Sharer-User-Id") long userId) {
+                              @RequestHeader(value = USER_ID) long userId) {
         return itemService.updateItem(itemDto, itemId, userId);
     }
 

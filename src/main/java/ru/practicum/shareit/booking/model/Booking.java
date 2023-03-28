@@ -2,6 +2,7 @@ package ru.practicum.shareit.booking.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import ru.practicum.shareit.item.model.Item;
@@ -17,6 +18,7 @@ import java.util.Objects;
 @ToString(exclude = {"item", "booker"})
 @Entity
 @Table(name = "bookings")
+@NoArgsConstructor
 public class Booking {
     @Id
     @Column(name = "id")
@@ -39,10 +41,6 @@ public class Booking {
     @Enumerated(EnumType.STRING)
     private BookingStatus status = BookingStatus.WAITING;
 
-
-    public Booking() {
-
-    }
 
     @Override
     public boolean equals(Object o) {

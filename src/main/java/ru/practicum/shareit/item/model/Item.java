@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.model;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -13,8 +14,8 @@ import java.util.Set;
 @ToString()
 @Entity
 @Table(name = "items")
+@NoArgsConstructor
 public class Item {
-
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,9 +35,6 @@ public class Item {
     @OneToMany(mappedBy = "item", fetch = FetchType.LAZY)
     private Set<Comment> comments;
 
-    public Item() {
-
-    }
 
     @Override
     public boolean equals(Object o) {
