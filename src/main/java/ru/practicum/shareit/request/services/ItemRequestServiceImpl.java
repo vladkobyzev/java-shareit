@@ -28,6 +28,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         this.userService = userService;
         this.requestRepository = requestRepository;
     }
+
     @Override
     public ItemRequestDto createRequest(ItemRequestDto requestDto, long userId) {
         userService.isExistUser(userId);

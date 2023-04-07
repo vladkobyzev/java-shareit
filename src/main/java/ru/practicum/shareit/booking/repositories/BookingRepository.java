@@ -34,6 +34,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "OR :state = 'ALL') " +
             "ORDER BY b.start DESC")
     List<Booking> findAllOwnerBookingsByState(@Param("ownerId") Long ownerId, @Param("state") String state);
+
     @Query("SELECT b FROM Booking b WHERE b.booker.id = :userId " +
             "AND (:state = 'CURRENT' AND CURRENT_TIMESTAMP BETWEEN b.start AND b.end " +
             "OR :state = 'PAST' AND b.end < CURRENT_TIMESTAMP " +
