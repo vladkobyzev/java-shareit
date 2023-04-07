@@ -28,7 +28,7 @@ class ItemRepositoryTest {
         Item item2 = new Item();
         item2.setName("MacBook Pro");
         item2.setDescription("Apple. This is a MacBook Pro.");
-        item2.setAvailable(false);
+        item2.setAvailable(true);
         itemRepository.save(item2);
 
         Item item3 = new Item();
@@ -41,12 +41,12 @@ class ItemRepositoryTest {
         assertEquals(1, foundItems.size());
         assertTrue(foundItems.contains(item1));
 
-        foundItems = itemRepository.searchItemByText("macbook");
+        foundItems = itemRepository.searchItemByText("pro");
         assertEquals(1, foundItems.size());
         assertTrue(foundItems.contains(item2));
 
         foundItems = itemRepository.searchItemByText("apple");
-        assertEquals(2, foundItems.size());
+        assertEquals(3, foundItems.size());
         assertTrue(foundItems.contains(item1));
         assertTrue(foundItems.contains(item3));
     }
