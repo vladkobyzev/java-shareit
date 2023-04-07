@@ -7,6 +7,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import javax.servlet.http.HttpServletRequest;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+
 @RestControllerAdvice
 @Slf4j
 public class ExceptionApiHandler {
@@ -18,17 +22,30 @@ public class ExceptionApiHandler {
                 .body(new ErrorMessage("Already used email:" + e.getMessage()));
     }
 
-    @ExceptionHandler(EntityNotFound.class)
-    public ResponseEntity<ErrorMessage> entityNotFound(EntityNotFound e) {
+    @ExceptionHandler({InappropriateUser.class, EntityNotFound.class})
+    public ResponseEntity<ErrorMessage> notFound(RuntimeException e) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(new ErrorMessage(e.getMessage()));
     }
 
-    @ExceptionHandler(InappropriateUser.class)
-    public ResponseEntity<ErrorMessage> inappropriateUser(InappropriateUser e) {
+    @ExceptionHandler({BadRequest.class, ItemIsUnavailable.class, BookingStatusAlreadySet.class})
+    public ResponseEntity<ErrorMessage> badRequest(RuntimeException e) {
         return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
+                .status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorMessage(e.getMessage()));
+    }
+
+    @ExceptionHandler(UnsupportedStatus.class)
+    public ResponseEntity<ErrorResponse> unsupportedStatus(UnsupportedStatus e, HttpServletRequest request) {
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+        String timestamp = formatter.format(ZonedDateTime.now());
+        String path = request.getRequestURI();
+        String error = e.getReasonPhrase();
+        String message = e.getMessage();
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        ErrorResponse errorResponse = new ErrorResponse(timestamp, status.value(), error, message, path);
+        return new ResponseEntity<>(errorResponse, status);
     }
 }
