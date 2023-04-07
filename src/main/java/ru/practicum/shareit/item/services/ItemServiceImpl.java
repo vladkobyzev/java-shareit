@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.services;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.BookingDate;
@@ -60,17 +61,17 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemDto> getItems(long ownerId) {
-        List<ItemDto> items = itemRepository.findAllByOwner(ownerId).stream()
+    public List<ItemDto> getItems(long ownerId, Integer from, Integer size) {
+        List<Item> items = getItemsPage(ownerId, from, size);
+        List<ItemDto> itemsDto = items.stream()
                 .peek(Item::getComments)
                 .map(this::convertItemToDto)
                 .sorted(Comparator.comparing(ItemDto::getId))
                 .collect(Collectors.toList());
 
-        setBookingDate(items);
-        return items;
+        setBookingDate(itemsDto);
+        return itemsDto;
     }
-
     @Override
     @Transactional
     public ItemDto createItem(ItemDto itemDto, long userId) {
@@ -85,33 +86,18 @@ public class ItemServiceImpl implements ItemService {
     public CommentDto createComment(CommentDto commentDto, long itemId, long userId) {
         isValidComment(commentDto, itemId, userId);
         Comment comment = new Comment();
-        comment.setText(commentDto.getText());
-        comment.setAuthorName(userService.getUserById(userId).getName());
-        comment.setItem(getItemById(itemId));
-        comment.setCreated(LocalDateTime.now());
+        setCommentField(comment, commentDto, itemId, userId);
         return convertCommentToDto(commentRepository.save(comment));
     }
-
     @Override
     public ItemDto updateItem(ItemDto itemDto, long itemId, long userId) {
         isExistItem(itemId);
         Item item = itemRepository.findById(itemId).get();
-
         if (item.getOwner() != userId) {
             throw new InappropriateUser("Item has a different owner" + userId);
         }
-        if (itemDto.getName() != null) {
-            item.setName(itemDto.getName());
-        }
-        if (itemDto.getDescription() != null) {
-            item.setDescription(itemDto.getDescription());
-        }
-        if (itemDto.getAvailable() != null) {
-            item.setAvailable(itemDto.getAvailable());
-        }
-
+        setUpdateItemFields(item, itemDto);
         return convertItemToDto(itemRepository.save(item));
-
     }
 
     @Override
@@ -135,7 +121,26 @@ public class ItemServiceImpl implements ItemService {
         }
         if (!bookingRepository.existsBookingByBooker_IdAndItem_IdAndStatusAndStartBefore(userId, itemId,
                 BookingStatus.APPROVED, LocalDateTime.now())) {
-            throw new BadRequest("User " + userId + "doesnt use this item " + itemId);
+            throw new BadRequest("User " + userId + " doesnt use this item " + itemId);
+        }
+    }
+
+    private void setCommentField(Comment comment, CommentDto commentDto, long itemId, long userId) {
+        comment.setText(commentDto.getText());
+        comment.setAuthorName(userService.getUserById(userId).getName());
+        comment.setItem(getItemById(itemId));
+        comment.setCreated(LocalDateTime.now());
+    }
+
+    private void setUpdateItemFields(Item item, ItemDto itemDto) {
+        if (itemDto.getName() != null) {
+            item.setName(itemDto.getName());
+        }
+        if (itemDto.getDescription() != null) {
+            item.setDescription(itemDto.getDescription());
+        }
+        if (itemDto.getAvailable() != null) {
+            item.setAvailable(itemDto.getAvailable());
         }
     }
 
@@ -155,6 +160,17 @@ public class ItemServiceImpl implements ItemService {
     public void isExistItem(long itemId) {
         if (!itemRepository.existsById(itemId)) {
             throw new EntityNotFound("Item not found:" + itemId);
+        }
+    }
+
+    private List<Item> getItemsPage(long ownerId, Integer from, Integer size) {
+        if (from == null && size == null) {
+            return itemRepository.findAllByOwner(ownerId);
+        } else {
+            if ((from == 0 && size == 0) || (from < 0 || size < 0)) {
+                throw new BadRequest("Request without pagination");
+            }
+            return itemRepository.findAllByOwner(ownerId, PageRequest.of(from, size)).toList();
         }
     }
 

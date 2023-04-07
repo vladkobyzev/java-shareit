@@ -11,6 +11,7 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repositories.UserRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,8 +55,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto updateUser(UserDto userDto, long userId) {
         isExistUser(userId);
+        isUsedEmail(userDto.getEmail(), userId);
         User user = userRepository.findById(userId).get();
-        isUsedEmail(user.getEmail(), userId);
 
         if (userDto.getName() != null) {
             user.setName(userDto.getName());
@@ -88,7 +89,8 @@ public class UserServiceImpl implements UserService {
     }
 
     private void isUsedEmail(String email, long userId) {
-        if (userRepository.findByEmail(email).getId() != userId) {
+        Optional<User> user = userRepository.findByEmail(email);
+        if (user.isPresent() && user.get().getId() != userId) {
             throw new AlreadyUsedEmail(email);
         }
     }
