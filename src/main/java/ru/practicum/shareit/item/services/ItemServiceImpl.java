@@ -72,6 +72,7 @@ public class ItemServiceImpl implements ItemService {
         setBookingDate(itemsDto);
         return itemsDto;
     }
+
     @Override
     @Transactional
     public ItemDto createItem(ItemDto itemDto, long userId) {
@@ -89,6 +90,7 @@ public class ItemServiceImpl implements ItemService {
         setCommentField(comment, commentDto, itemId, userId);
         return convertCommentToDto(commentRepository.save(comment));
     }
+
     @Override
     public ItemDto updateItem(ItemDto itemDto, long itemId, long userId) {
         isExistItem(itemId);

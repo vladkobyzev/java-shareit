@@ -63,6 +63,7 @@ public class BookingServiceImpl implements BookingService {
                 : getAllUserBookingsWithPagination(userId, state, userType, from, size);
         return convertListBookingToDto(bookings);
     }
+
     @Transactional
     public SentBookingDto createBooking(ReceivedBookingDto bookingDto, long userId) {
         isValidBookingTimeRequest(bookingDto);
@@ -123,6 +124,7 @@ public class BookingServiceImpl implements BookingService {
         }
         return bookingsSlice.toList();
     }
+
     private Slice<Booking> getBookingSlice(long userId, String state, String userType, PageRequest pageRequest) {
         return userType.equals(USER)
                 ? bookingRepository.findAllUserBookingsByState(userId, state, pageRequest)

@@ -12,6 +12,7 @@ import java.util.List;
 @Repository
 public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> findAllByOwner(long ownerId);
+
     Slice<Item> findAllByOwner(long ownerId, Pageable pageable);
 
     @Query(value = "SELECT * FROM items WHERE (name ILIKE CONCAT('%',?1,'%') OR description ILIKE CONCAT('%',?1,'%')) AND " +

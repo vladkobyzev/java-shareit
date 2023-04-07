@@ -15,7 +15,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import ru.practicum.shareit.booking.dto.ReceivedBookingDto;
-import ru.practicum.shareit.booking.dto.ReceivedBookingDtoTest;
 import ru.practicum.shareit.booking.dto.SentBookingDto;
 import ru.practicum.shareit.booking.services.BookingService;
 
