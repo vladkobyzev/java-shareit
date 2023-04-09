@@ -2,60 +2,103 @@ package ru.practicum.shareit.user.services;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.modelmapper.ModelMapper;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.practicum.shareit.exceptions.AlreadyUsedEmail;
 import ru.practicum.shareit.exceptions.EntityNotFound;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repositories.UserRepository;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith({SpringExtension.class})
 public class UserServiceImplTest {
 
-    @MockBean
+    @InjectMocks
     private UserServiceImpl userService;
+    @Mock
+    ModelMapper modelMapper;
+    @Mock
+    private UserRepository userRepository;
 
     @Test
     public void testUpdateUser_withValidUserIdAndNewName_shouldUpdateName() {
         long userId = 1L;
         UserDto updatedUserDto = new UserDto();
-        updatedUserDto.setId(userId);
-        updatedUserDto.setName("John Updated");
-        updatedUserDto.setEmail("john@example.com");
+        updatedUserDto.setName("John");
 
-        UserDto updatedUserDto1 = new UserDto();
-        updatedUserDto1.setName("John Updated");
+        User user = new User();
+        user.setId(userId);
+        user.setName("Bob");
+        user.setEmail("john@example.com");
 
-        when(userService.updateUser(updatedUserDto1, userId)).thenReturn(updatedUserDto);
+        UserDto userDto = new UserDto();
+        userDto.setId(userId);
+        userDto.setName("John");
+        userDto.setEmail("john@example.com");
 
-        UserDto updatedUser = userService.updateUser(updatedUserDto1, userId);
+        User updatedUser = new User();
+        updatedUser.setId(userId);
+        updatedUser.setName(userDto.getName());
+        updatedUser.setEmail(userDto.getEmail());
 
-        assertNotNull(updatedUser);
-        assertEquals(updatedUser.getName(), "John Updated");
-        assertEquals(updatedUser.getEmail(), "john@example.com");
+
+        when(userRepository.existsById(userId)).thenReturn(true);
+        when(userRepository.findByEmail(updatedUserDto.getEmail())).thenReturn(Optional.of(user));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.save(updatedUser)).thenReturn(updatedUser);
+        when(modelMapper.map(updatedUser, UserDto.class)).thenReturn(userDto);
+
+
+        UserDto actualUser = userService.updateUser(updatedUserDto, userId);
+
+        assertNotNull(actualUser);
+        assertEquals(actualUser.getName(), "John");
+        assertEquals(actualUser.getEmail(), "john@example.com");
     }
 
     @Test
     public void testUpdateUser_withValidUserIdAndNewEmail_shouldUpdateEmail() {
         long userId = 1L;
-        UserDto existingUser = new UserDto();
-        existingUser.setId(userId);
-        existingUser.setName("John");
-        existingUser.setEmail("updated@example.com");
-
         UserDto updatedUserDto = new UserDto();
         updatedUserDto.setEmail("updated@example.com");
-        when(userService.updateUser(updatedUserDto, userId)).thenReturn(existingUser);
 
-        UserDto updatedUser = userService.updateUser(updatedUserDto, userId);
+        User user = new User();
+        user.setId(userId);
+        user.setName("John");
+        user.setEmail("old@Gmail.com");
 
-        assertNotNull(updatedUser);
-        assertEquals(updatedUser.getName(), "John");
-        assertEquals(updatedUser.getEmail(), "updated@example.com");
+        UserDto userDto = new UserDto();
+        userDto.setId(userId);
+        userDto.setName("John");
+        userDto.setEmail("updated@example.com");
+
+        User updatedUser = new User();
+        updatedUser.setId(userId);
+        updatedUser.setName(userDto.getName());
+        updatedUser.setEmail(userDto.getEmail());
+
+
+        when(userRepository.existsById(userId)).thenReturn(true);
+        when(userRepository.findByEmail(updatedUserDto.getEmail())).thenReturn(Optional.of(user));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.save(updatedUser)).thenReturn(updatedUser);
+        when(modelMapper.map(updatedUser, UserDto.class)).thenReturn(userDto);
+
+
+        UserDto actualUser = userService.updateUser(updatedUserDto, userId);
+
+        assertNotNull(actualUser);
+        assertEquals(actualUser.getName(), "John");
+        assertEquals(actualUser.getEmail(), "updated@example.com");
     }
 
     @Test
@@ -63,7 +106,6 @@ public class UserServiceImplTest {
         long userId = 1L;
         UserDto updatedUserDto = new UserDto();
         updatedUserDto.setEmail("update@example.com");
-        Mockito.when(userService.updateUser(updatedUserDto, userId)).thenThrow(new EntityNotFound("User not found: " + userId));
 
         final EntityNotFound exception = assertThrows(EntityNotFound.class,
                 () -> userService.updateUser(updatedUserDto, userId));
@@ -84,14 +126,95 @@ public class UserServiceImplTest {
         existingUser1.setName("Jane");
         existingUser1.setEmail("jane@example.com");
 
-        UserDto updatedUserDto = new UserDto();
-        updatedUserDto.setName("John Update");
-        updatedUserDto.setEmail("jane@example.com");
-        when(userService.updateUser(updatedUserDto, userId)).thenThrow(new AlreadyUsedEmail("Already Used Email: " + "jane@example.com"));
+        UserDto updatUserDto = new UserDto();
+        updatUserDto.setName("John Update");
+        updatUserDto.setEmail("jane@example.com");
+        when(userRepository.existsById(userId)).thenReturn(true);
+        when(userRepository.findByEmail(updatUserDto.getEmail())).thenReturn(Optional.of(existingUser1));
+
 
         final AlreadyUsedEmail exception = assertThrows(AlreadyUsedEmail.class,
-                () -> userService.updateUser(updatedUserDto, userId));
+                () -> userService.updateUser(updatUserDto, userId));
 
         assertEquals("Already Used Email: " + "jane@example.com", exception.getMessage());
+    }
+
+    @Test
+    public void testDeleteUser() {
+        long userId = 1L;
+
+        userService.deleteUser(userId);
+
+        verify(userRepository).deleteById(userId);
+    }
+
+    @Test
+    public void testCreateUser_success() {
+        long userId = 1L;
+        User existingUser = new User();
+        existingUser.setId(userId);
+        existingUser.setName("John");
+        existingUser.setEmail("john@example.com");
+
+        UserDto userDto = new UserDto();
+        userDto.setId(userId);
+        userDto.setName("John");
+        userDto.setEmail("john@example.com");
+
+        when(userRepository.save(existingUser)).thenReturn(existingUser);
+        when(modelMapper.map(userDto, User.class)).thenReturn(existingUser);
+        when(modelMapper.map(existingUser, UserDto.class)).thenReturn(userDto);
+
+        userService.createUser(userDto);
+
+        verify(userRepository).save(existingUser);
+    }
+
+    @Test
+    public void testGetUserDtoById_success() {
+        long userId = 1L;
+        User existingUser = new User();
+        existingUser.setId(userId);
+        existingUser.setName("John");
+        existingUser.setEmail("john@example.com");
+
+        UserDto userDto = new UserDto();
+        userDto.setId(userId);
+        userDto.setName("John");
+        userDto.setEmail("john@example.com");
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+        when(modelMapper.map(existingUser, UserDto.class)).thenReturn(userDto);
+
+        userService.getUserDtoById(userId);
+
+        verify(userRepository).findById(userId);
+    }
+
+    @Test
+    public void testGetUserDtoById_shouldThrowException() {
+        long userId = 1L;
+        when(userRepository.findById(userId)).thenThrow(new EntityNotFound("User not found"));
+
+        assertThrows(EntityNotFound.class, () -> userService.getUserDtoById(userId));
+    }
+
+    @Test
+    public void testGetAllUsers_success() {
+        User user = new User();
+        User user1 = new User();
+        User user2 = new User();
+        List<User> users = List.of(user, user1, user2);
+
+        when(userRepository.findAll()).thenReturn(users);
+        List<UserDto> usersDto = userService.getAllUsers();
+        assertEquals(3, usersDto.size());
+    }
+
+    @Test
+    public void testGetAllUsersReturnsEmptyList() {
+        when(userRepository.findAll()).thenReturn(Collections.emptyList());
+        List<UserDto> users = userService.getAllUsers();
+        assertEquals(0, users.size());
     }
 }

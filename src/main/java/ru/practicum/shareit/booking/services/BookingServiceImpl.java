@@ -78,7 +78,7 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     public SentBookingDto updateBookingStatus(long bookingId, String approved, long userId) {
         Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new EntityNotFound("Booking not found"));
+                .orElseThrow(() -> new EntityNotFound("Booking not found: " + bookingId));
         isValidUpdateBookingStatusRequest(booking, userId, bookingId);
         setBookingStatus(booking, approved);
         return convertBookingToDto(bookingRepository.save(booking));

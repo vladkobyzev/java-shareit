@@ -93,8 +93,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto updateItem(ItemDto itemDto, long itemId, long userId) {
-        isExistItem(itemId);
-        Item item = itemRepository.findById(itemId).get();
+        Item item = getItemById(itemId);
         if (item.getOwner() != userId) {
             throw new InappropriateUser("Item has a different owner" + userId);
         }
@@ -156,13 +155,6 @@ public class ItemServiceImpl implements ItemService {
 
     private CommentDto convertCommentToDto(Comment comment) {
         return mapper.map(comment, CommentDto.class);
-    }
-
-
-    public void isExistItem(long itemId) {
-        if (!itemRepository.existsById(itemId)) {
-            throw new EntityNotFound("Item not found:" + itemId);
-        }
     }
 
     private List<Item> getItemsPage(long ownerId, Integer from, Integer size) {

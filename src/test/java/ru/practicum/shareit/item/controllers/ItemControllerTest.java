@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,8 +39,9 @@ public class ItemControllerTest {
     private static final long USER_ID = 1;
     private static final long ITEM_ID = 2;
 
+    @SneakyThrows
     @Test
-    public void testGetItemById() throws Exception {
+    public void testGetItemById() {
         ItemDto itemDto = new ItemDto();
         itemDto.setId(ITEM_ID);
         itemDto.setName("Test item");
@@ -52,8 +54,9 @@ public class ItemControllerTest {
                 .andExpect(jsonPath("$.name", is("Test item")));
     }
 
+    @SneakyThrows
     @Test
-    public void testGetItems() throws Exception {
+    public void testGetItems() {
         ItemDto item1 = new ItemDto();
         item1.setId(ITEM_ID);
         item1.setName("Test item 1");
@@ -74,8 +77,9 @@ public class ItemControllerTest {
                 .andExpect(jsonPath("$[1].name", is("Test item 2")));
     }
 
+    @SneakyThrows
     @Test
-    public void testSearchItemsByText() throws Exception {
+    public void testSearchItemsByText() {
         ItemDto item1 = new ItemDto();
         item1.setId(ITEM_ID);
         item1.setName("Test item 1");
@@ -96,8 +100,9 @@ public class ItemControllerTest {
                 .andExpect(jsonPath("$[1].name", is("Test item 2")));
     }
 
+    @SneakyThrows
     @Test
-    public void testCreateItem_Success() throws Exception {
+    public void testCreateItem_Success() {
         ItemDto itemDto = new ItemDto();
         itemDto.setName("Test Item");
         itemDto.setDescription("Test Desc");
@@ -114,8 +119,9 @@ public class ItemControllerTest {
                 .andReturn();
     }
 
+    @SneakyThrows
     @Test
-    public void testCreateItem_InvalidItem() throws Exception {
+    public void testCreateItem_InvalidItem() {
         ItemDto itemDto = new ItemDto();
         itemDto.setName("");
 
@@ -127,8 +133,9 @@ public class ItemControllerTest {
                 .andReturn();
     }
 
+    @SneakyThrows
     @Test
-    public void testCreateComment_Success() throws Exception {
+    public void testCreateComment_Success() {
         CommentDto commentDto = new CommentDto();
         commentDto.setText("Test Comment");
 
@@ -143,8 +150,9 @@ public class ItemControllerTest {
                 .andReturn();
     }
 
+    @SneakyThrows
     @Test
-    public void testUpdateItem_Success() throws Exception {
+    public void testUpdateItem_Success() {
         ItemDto itemDto = new ItemDto();
         itemDto.setId(1L);
         itemDto.setName("Test Item");
@@ -158,6 +166,16 @@ public class ItemControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(itemDto.getId()))
                 .andExpect(jsonPath("$.name").value(itemDto.getName()))
+                .andReturn();
+    }
+
+    @SneakyThrows
+    @Test
+    public void testDeleteItem_Success() {
+        mockMvc.perform(delete("/items/1")
+                        .header("X-Sharer-User-Id", 1L)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
                 .andReturn();
     }
 }

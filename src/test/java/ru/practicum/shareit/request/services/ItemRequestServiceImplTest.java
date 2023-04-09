@@ -2,9 +2,15 @@ package ru.practicum.shareit.request.services;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.modelmapper.ModelMapper;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import ru.practicum.shareit.exceptions.BadRequest;
 import ru.practicum.shareit.exceptions.EntityNotFound;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.model.ItemRequest;
@@ -13,25 +19,24 @@ import ru.practicum.shareit.user.services.UserService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith({SpringExtension.class})
 class ItemRequestServiceImplTest {
-    @MockBean
+    @Mock
     private RequestRepository requestRepository;
 
-    @MockBean
+    @Mock
     private UserService userService;
 
-    @MockBean
-    private ItemRequestService requestService;
+    @InjectMocks
+    private ItemRequestServiceImpl requestService;
 
-    @MockBean
+    @Mock
     private ModelMapper modelMapper;
 
 
@@ -50,8 +55,8 @@ class ItemRequestServiceImplTest {
 
         doNothing().when(userService).isExistUser(userId);
         when(requestRepository.save(request)).thenReturn(request);
-        when(requestService.createRequest(requestDto, userId)).thenReturn(requestDto);
-
+        when(modelMapper.map(requestDto, ItemRequest.class)).thenReturn(request);
+        when(modelMapper.map(request, ItemRequestDto.class)).thenReturn(requestDto);
 
         ItemRequestDto result = requestService.createRequest(requestDto, userId);
 
@@ -66,7 +71,8 @@ class ItemRequestServiceImplTest {
         ItemRequestDto requestDto = new ItemRequestDto();
         requestDto.setDescription("Test Description");
 
-        when(requestService.createRequest(requestDto, userId)).thenThrow(new EntityNotFound("Entity not found"));
+
+        doThrow(new EntityNotFound("User not found")).when(userService).isExistUser(userId);
 
         assertThrows(EntityNotFound.class, () -> requestService.createRequest(requestDto, userId));
     }
@@ -75,18 +81,22 @@ class ItemRequestServiceImplTest {
     public void testGetRequestById() {
         long userId = 1;
         long requestId = 1;
-        ItemRequestDto requestDto = new ItemRequestDto();
-        requestDto.setId(requestId);
         ItemRequest request = new ItemRequest();
         request.setOwner(userId);
+        request.setDescription("text");
+        ItemRequestDto requestDto = new ItemRequestDto();
+        requestDto.setId(requestId);
+        requestDto.setDescription("text");
 
         doNothing().when(userService).isExistUser(userId);
-        when(requestService.getRequestById(requestId, userId)).thenReturn(requestDto);
-        requestRepository.save(request);
+        when(requestRepository.findById(requestId)).thenReturn(Optional.of(request));
+        when(modelMapper.map(request, ItemRequestDto.class)).thenReturn(requestDto);
+
         ItemRequestDto actualResultDto = requestService.getRequestById(requestId, userId);
 
         assertNotNull(actualResultDto);
         assertEquals(requestId, actualResultDto.getId());
+        verify(requestRepository).findById(requestId);
     }
 
     @Test
@@ -96,16 +106,13 @@ class ItemRequestServiceImplTest {
         ItemRequest request = new ItemRequest();
         request.setOwner(userId);
 
-        when(requestService.getRequestById(requestId, userId)).thenThrow(new EntityNotFound("Entity not found"));
         assertThrows(EntityNotFound.class, () -> requestService.getRequestById(requestId, userId));
-
     }
 
     @Test
     public void testGetRequestByIdInvalidRequest() {
         long userId = 1;
         long requestId = -1;
-        when(requestService.getRequestById(requestId, userId)).thenThrow(new EntityNotFound("Entity not found"));
 
         assertThrows(EntityNotFound.class, () -> requestService.getRequestById(requestId, userId));
     }
@@ -113,12 +120,12 @@ class ItemRequestServiceImplTest {
     @Test
     public void testGetOwnerRequests() {
         long ownerId = 1;
-        List<ItemRequestDto> requests = new ArrayList<>();
-        requests.add(new ItemRequestDto());
-        requests.add(new ItemRequestDto());
+        List<ItemRequest> requests = new ArrayList<>();
+        requests.add(new ItemRequest());
+        requests.add(new ItemRequest());
 
         doNothing().when(userService).isExistUser(ownerId);
-        when(requestService.getOwnerRequests(ownerId)).thenReturn(requests);
+        when(requestRepository.findAllByOwner(ownerId)).thenReturn(requests);
 
         List<ItemRequestDto> result = requestService.getOwnerRequests(ownerId);
         assertEquals(requests.size(), result.size());
@@ -131,22 +138,58 @@ class ItemRequestServiceImplTest {
         when(requestService.getOwnerRequests(ownerId)).thenThrow(new EntityNotFound("Entity not found"));
 
         assertThrows(EntityNotFound.class, () -> requestService.getOwnerRequests(ownerId));
-
     }
 
     @Test
-    public void testGetUserRequests_whenNoPagination() {
-        Long userId = 1L;
-        List<ItemRequest> requests = Arrays.asList(new ItemRequest(), new ItemRequest());
+    public void testGetUserRequests_noPagination_success() {
+        long userId = 1L;
+        List<ItemRequest> requests = new ArrayList<>();
+        ItemRequest itemRequest1 = new ItemRequest();
+        itemRequest1.setId(1L);
+        itemRequest1.setDescription("text");
+        requests.add(itemRequest1);
+        ItemRequest itemRequest2 = new ItemRequest();
+        itemRequest1.setId(2L);
+        itemRequest1.setDescription("text2");
+        requests.add(itemRequest2);
         when(requestRepository.findAllByOwner(userId)).thenReturn(requests);
-        when(requestService.getUserRequests(userId, null, null)).thenAnswer(invocationOnMock -> {
-            return requestRepository.findAllByOwner(userId).stream()
-                    .map(itemRequest -> modelMapper.map(itemRequest, ItemRequestDto.class))
-                    .collect(Collectors.toList());
-        });
+
         List<ItemRequestDto> result = requestService.getUserRequests(userId, null, null);
 
-        verify(requestRepository).findAllByOwner(userId);
-        assertEquals(requests.size(), result.size());
+        assertEquals(2, result.size());
+        verify(requestRepository, times(1)).findAllByOwner(userId);
+    }
+
+    @Test
+    public void testGetUserRequests_withPagination_success() {
+        long userId = 1L;
+        List<ItemRequest> requests = new ArrayList<>();
+        ItemRequest itemRequest1 = new ItemRequest();
+        itemRequest1.setId(1L);
+        itemRequest1.setDescription("text");
+        requests.add(itemRequest1);
+        ItemRequest itemRequest2 = new ItemRequest();
+        itemRequest1.setId(2L);
+        itemRequest1.setDescription("text2");
+        requests.add(itemRequest2);
+
+        Page<ItemRequest> requestPage = new PageImpl<>(requests);
+        when(requestRepository.findAllByOwnerNot(userId,
+                PageRequest.of(1, 1, Sort.by("created")
+                        .ascending()))).thenReturn(requestPage.toList());
+
+        List<ItemRequestDto> result = requestService.getUserRequests(userId, 1, 1);
+
+        assertEquals(2, result.size());
+        verify(requestRepository, times(1)).findAllByOwnerNot(userId, PageRequest.of(1, 1, Sort.by("created").ascending()));
+    }
+
+    @Test
+    public void testGetUserRequests_shouldThrowBedRequest() {
+        long userId = 1L;
+        int from = 0;
+        int size = 0;
+
+        assertThrows(BadRequest.class, () -> requestService.getUserRequests(userId, from, size));
     }
 }

@@ -91,7 +91,7 @@ public class UserServiceImpl implements UserService {
     private void isUsedEmail(String email, long userId) {
         Optional<User> user = userRepository.findByEmail(email);
         if (user.isPresent() && user.get().getId() != userId) {
-            throw new AlreadyUsedEmail(email);
+            throw new AlreadyUsedEmail("Already Used Email: " + email);
         }
     }
 }

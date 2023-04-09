@@ -132,4 +132,35 @@ public class UserServiceImplIntegrationTest {
 
         assertThrows(AlreadyUsedEmail.class, () -> userService.updateUser(userDto, savedUser.getId()));
     }
+
+    @Test
+    public void testDeleteUser() {
+        User user = new User();
+        user.setName("test1");
+        user.setEmail("test1@example.com");
+        User savedUser = userRepository.save(user);
+
+        userService.deleteUser(savedUser.getId());
+    }
+
+    @Test
+    public void testGetUserDtoById_Success() {
+        User user = new User();
+        user.setName("test1");
+        user.setEmail("test1@example.com");
+        User savedUser = userRepository.save(user);
+
+        UserDto userFromDb = userService.getUserDtoById(savedUser.getId());
+        assertEquals(userFromDb.getEmail(), user.getEmail());
+    }
+
+    @Test
+    public void testGetUserDtoById_shouldTrowException() {
+        User user = new User();
+        user.setId(1L);
+        user.setName("test1");
+        user.setEmail("test1@example.com");
+
+        assertThrows(EntityNotFound.class, () -> userService.getUserDtoById(user.getId()));
+    }
 }
