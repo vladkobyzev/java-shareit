@@ -73,7 +73,6 @@ class ItemServiceImplTest {
         itemDto1.setName("new name");
         itemDto1.setDescription("new description");
 
-        when(itemRepository.existsById(itemId)).thenReturn(true);
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
         when(itemRepository.save(item)).thenReturn(item);
         when(modelMapper.map(item, ItemDto.class)).thenReturn(itemDto1);
@@ -86,7 +85,7 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void updateItem_WithInappropriateUser_ShouldThrowInappropriateUserException() {
+    void testUpdateItem_shouldThrowInappropriateUserException() {
         long itemId = 1L;
         long userId = 2L;
         ItemDto itemDto = new ItemDto();
@@ -99,7 +98,6 @@ class ItemServiceImplTest {
         item.setDescription("old description");
         item.setOwner(3L);
 
-        when(itemRepository.existsById(itemId)).thenReturn(true);
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
 
         assertThrows(InappropriateUser.class, () -> itemService.updateItem(itemDto, itemId, userId));
