@@ -205,9 +205,7 @@ public class ItemServiceImplIntegrationTest {
         CommentDto commentDto = new CommentDto();
         commentDto.setText("Test comment");
 
-        assertThrows(BadRequest.class, () -> {
-            itemService.createComment(commentDto, item.getId(), Long.MAX_VALUE);
-        });
+        assertThrows(BadRequest.class, () -> itemService.createComment(commentDto, item.getId(), Long.MAX_VALUE));
     }
 
     @Test
@@ -236,9 +234,7 @@ public class ItemServiceImplIntegrationTest {
         CommentDto commentDto = new CommentDto();
         commentDto.setText("");
 
-        assertThrows(BadRequest.class, () -> {
-            itemService.createComment(commentDto, item.getId(), user.getId());
-        });
+        assertThrows(BadRequest.class, () -> itemService.createComment(commentDto, item.getId(), user.getId()));
     }
 
     @Test
@@ -374,7 +370,8 @@ public class ItemServiceImplIntegrationTest {
     }
 
     @Test
-    public void testGetItemDtoById_withValidItemIdAndUserId_shouldReturnItemDto() {
+    public void testGetItemDtoById_withValidItemIdAndUserId_shouldReturnItemDtoWithDate() {
+        LocalDateTime now = LocalDateTime.now();
         User user = new User();
         user.setName("John");
         user.setEmail("john@example.com");
@@ -386,11 +383,73 @@ public class ItemServiceImplIntegrationTest {
         item.setDescription("Test description");
         itemRepository.save(item);
 
+        Booking lastBooking = new Booking();
+        lastBooking.setBooker(user);
+        lastBooking.setStart(now.minusMonths(2));
+        lastBooking.setEnd(now.minusMonths(1));
+        lastBooking.setStatus(BookingStatus.APPROVED);
+        lastBooking.setItem(item);
+        bookingRepository.save(lastBooking);
+
+        Booking nextBooking = new Booking();
+        nextBooking.setBooker(user);
+        nextBooking.setStart(now.plusHours(1));
+        nextBooking.setEnd(now.plusHours(3));
+        nextBooking.setStatus(BookingStatus.APPROVED);
+        nextBooking.setItem(item);
+        bookingRepository.save(nextBooking);
+
         ItemDto itemDto = itemService.getItemDtoById(item.getId(), user.getId());
 
         assertNotNull(itemDto);
         assertEquals(item.getName(), itemDto.getName());
         assertEquals(item.getDescription(), itemDto.getDescription());
+        assertEquals(lastBooking.getStart(), itemDto.getLastBooking().getBookingDate());
+        assertEquals(nextBooking.getStart(), itemDto.getNextBooking().getBookingDate());
+    }
+
+    @Test
+    public void testGetItemDtoById_withValidItemIdAndUserId_shouldReturnItemDtoWithoutDate() {
+        LocalDateTime now = LocalDateTime.now();
+        User owner = new User();
+        owner.setName("John");
+        owner.setEmail("john@example.com");
+        userRepository.save(owner);
+
+        User user = new User();
+        user.setName("Bob");
+        user.setEmail("Bob@example.com");
+        userRepository.save(user);
+
+        Item item = new Item();
+        item.setName("Test item");
+        item.setOwner(owner.getId());
+        item.setDescription("Test description");
+        itemRepository.save(item);
+
+        Booking lastBooking = new Booking();
+        lastBooking.setBooker(owner);
+        lastBooking.setStart(now.minusMonths(2));
+        lastBooking.setEnd(now.minusMonths(1));
+        lastBooking.setStatus(BookingStatus.APPROVED);
+        lastBooking.setItem(item);
+        bookingRepository.save(lastBooking);
+
+        Booking nextBooking = new Booking();
+        nextBooking.setBooker(owner);
+        nextBooking.setStart(now.plusHours(1));
+        nextBooking.setEnd(now.plusHours(3));
+        nextBooking.setStatus(BookingStatus.APPROVED);
+        nextBooking.setItem(item);
+        bookingRepository.save(nextBooking);
+
+        ItemDto itemDto = itemService.getItemDtoById(item.getId(), user.getId());
+
+        assertNotNull(itemDto);
+        assertEquals(item.getName(), itemDto.getName());
+        assertEquals(item.getDescription(), itemDto.getDescription());
+        assertNull(itemDto.getNextBooking());
+        assertNull(itemDto.getLastBooking());
     }
 
     @Test

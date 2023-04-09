@@ -320,7 +320,57 @@ public class BookingServiceImplIntegrationTest {
     }
 
     @Test
-    void getAllUserBookings_WithValidData_ShouldReturnBookingsWithoutPagination() {
+    void getAllUserBookings_WithValidData_ShouldReturnUserBookingsWithoutPagination() {
+        LocalDateTime now = LocalDateTime.now();
+        User user = new User();
+        user.setName("John");
+        user.setEmail("john@example.com");
+        userRepository.save(user);
+
+        User user1 = new User();
+        user1.setName("asd");
+        user1.setEmail("asd@example.com");
+        userRepository.save(user1);
+
+        Item item = new Item();
+        item.setName("Item 1");
+        item.setDescription("Description 1");
+        item.setAvailable(true);
+        item.setOwner(user.getId());
+        itemRepository.save(item);
+
+        Booking b1 = new Booking();
+        b1.setBooker(user);
+        b1.setStart(now.minusHours(2));
+        b1.setEnd(now.minusHours(1));
+        b1.setStatus(BookingStatus.WAITING);
+        b1.setItem(item);
+        bookingRepository.save(b1);
+
+        Booking b2 = new Booking();
+        b2.setBooker(user);
+        b2.setStart(now.plusHours(1));
+        b2.setEnd(now.plusHours(3));
+        b2.setStatus(BookingStatus.APPROVED);
+        b2.setItem(item);
+        bookingRepository.save(b2);
+
+        Booking b3 = new Booking();
+        b3.setBooker(user1);
+        b3.setStart(now.minusHours(7));
+        b3.setEnd(now.minusHours(6));
+        b3.setStatus(BookingStatus.APPROVED);
+        b3.setItem(item);
+        bookingRepository.save(b3);
+
+        List<SentBookingDto> actualBookingsUser = bookingService.getAllUserBookings(user1.getId(), "ALL", "USER", null, null);
+
+        assertThat(actualBookingsUser).isNotNull();
+        assertThat(actualBookingsUser.size()).isEqualTo(1);
+    }
+
+    @Test
+    void getAllUserBookings_WithValidData_ShouldReturnOwnerBookingsWithoutPagination() {
         LocalDateTime now = LocalDateTime.now();
         User user = new User();
         user.setName("John");
@@ -367,15 +417,10 @@ public class BookingServiceImplIntegrationTest {
 
         assertThat(actualBookingsOwner).isNotNull();
         assertThat(actualBookingsOwner.size()).isEqualTo(3);
-
-        List<SentBookingDto> actualBookingsUser = bookingService.getAllUserBookings(user1.getId(), "ALL", "USER", null, null);
-
-        assertThat(actualBookingsUser).isNotNull();
-        assertThat(actualBookingsUser.size()).isEqualTo(1);
     }
 
     @Test
-    void getAllUserBookings_WithValidData_ShouldReturnBookingsWithPagination() {
+    void getAllUserBookings_withValidData_shouldReturnUserBookingsWithPagination() {
         LocalDateTime now = LocalDateTime.now();
         User user = new User();
         user.setName("John");
@@ -431,6 +476,59 @@ public class BookingServiceImplIntegrationTest {
         assertThat(actualBookingsOwner).isNotNull();
         assertThat(actualBookingsOwner.size()).isEqualTo(2);
         assertEquals(actualBookingsOwner.get(0).getId(), b1.getId());
+    }
+
+    @Test
+    void getAllUserBookings_withValidData_shouldReturnOwnerBookingsWithPagination() {
+        LocalDateTime now = LocalDateTime.now();
+        User user = new User();
+        user.setName("John");
+        user.setEmail("john@example.com");
+        userRepository.save(user);
+
+        User user1 = new User();
+        user1.setName("asd");
+        user1.setEmail("asd@example.com");
+        userRepository.save(user1);
+
+        Item item = new Item();
+        item.setName("Item 1");
+        item.setDescription("Description 1");
+        item.setAvailable(true);
+        item.setOwner(user.getId());
+        itemRepository.save(item);
+
+        Booking b1 = new Booking();
+        b1.setBooker(user);
+        b1.setStart(now.minusHours(2));
+        b1.setEnd(now.minusHours(1));
+        b1.setStatus(BookingStatus.WAITING);
+        b1.setItem(item);
+        bookingRepository.save(b1);
+
+        Booking b2 = new Booking();
+        b2.setBooker(user);
+        b2.setStart(now.plusHours(1));
+        b2.setEnd(now.plusHours(3));
+        b2.setStatus(BookingStatus.APPROVED);
+        b2.setItem(item);
+        bookingRepository.save(b2);
+
+        Booking b3 = new Booking();
+        b3.setBooker(user);
+        b3.setStart(now.minusHours(7));
+        b3.setEnd(now.minusHours(6));
+        b3.setStatus(BookingStatus.APPROVED);
+        b3.setItem(item);
+        bookingRepository.save(b3);
+
+        Booking b4 = new Booking();
+        b4.setBooker(user1);
+        b4.setStart(now.plusHours(8));
+        b4.setEnd(now.plusHours(9));
+        b4.setStatus(BookingStatus.APPROVED);
+        b4.setItem(item);
+        bookingRepository.save(b4);
 
         List<SentBookingDto> actualBookingsUser = bookingService.getAllUserBookings(user1.getId(), "ALL", "USER", 0, 1);
 
@@ -459,5 +557,16 @@ public class BookingServiceImplIntegrationTest {
         long invalidUserId = 1000L;
 
         assertThrows(EntityNotFound.class, () -> bookingService.getAllUserBookings(invalidUserId, invalidStatus, "OWNER", 1, 2));
+    }
+
+    @Test
+    void getAllUserBookings_withInvalidPaginationRequest_shouldThrowBadRequest() {
+        String status = "ALL";
+        User user = new User();
+        user.setName("John");
+        user.setEmail("john@example.com");
+        userRepository.save(user);
+
+        assertThrows(BadRequest.class, () -> bookingService.getAllUserBookings(user.getId(), status, "USER", 0, 0));
     }
 }
