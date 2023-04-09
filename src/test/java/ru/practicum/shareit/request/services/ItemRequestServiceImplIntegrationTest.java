@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.exceptions.BadRequest;
 import ru.practicum.shareit.exceptions.EntityNotFound;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.model.ItemRequest;
@@ -31,7 +32,7 @@ class ItemRequestServiceImplIntegrationTest {
     private RequestRepository itemRequestRepository;
 
     @Test
-    void shouldCreateRequestSuccessfully() {
+    void shouldCreateRequest_success() {
         User user = new User();
         user.setName("John Doe");
         user.setEmail("johndoe@example.com");
@@ -56,7 +57,19 @@ class ItemRequestServiceImplIntegrationTest {
     }
 
     @Test
-    void getRequestById_ValidId_ReturnsRequest() {
+    void shouldCreateRequest_withInvalidUserId_shouldThrowEntityNotFound() {
+        User invalidUser = new User();
+        invalidUser.setId(1L);
+
+        ItemRequestDto requestDto = new ItemRequestDto();
+        requestDto.setDescription("Test request");
+        requestDto.setItems(Collections.emptyList());
+
+        assertThrows(EntityNotFound.class, () -> itemRequestService.createRequest(requestDto, invalidUser.getId()));
+    }
+
+    @Test
+    void getRequestById_validId_shouldReturnsRequest() {
         User user = new User();
         user.setName("John");
         user.setEmail("johndoe@example.com");
@@ -77,7 +90,7 @@ class ItemRequestServiceImplIntegrationTest {
     }
 
     @Test
-    void getRequestById_InvalidId_ThrowsEntityNotFound() {
+    void getRequestById_InvalidRequestId_ThrowsEntityNotFound() {
         long invalidId = 100L;
         User user = new User();
         user.setName("John");
@@ -155,7 +168,7 @@ class ItemRequestServiceImplIntegrationTest {
     }
 
     @Test
-    public void testGetUserRequests() {
+    public void testGetUserRequests_noPagination() {
         User user1 = new User();
         user1.setName("Test User");
         user1.setEmail("test@example.com");
@@ -209,5 +222,31 @@ class ItemRequestServiceImplIntegrationTest {
         List<ItemRequestDto> requests = itemRequestService.getUserRequests(user1.getId(), 0, 1);
 
         assertThat(requests.size()).isEqualTo(1);
+    }
+
+    @Test
+    public void testGetUserRequests_withInvalidRequestPagination_shouldThrowBadRequest() {
+        User user1 = new User();
+        user1.setName("Test User");
+        user1.setEmail("test@example.com");
+        userRepository.save(user1);
+        User user2 = new User();
+        user2.setName("Test User2");
+        user2.setEmail("test2@example.com");
+        userRepository.save(user2);
+        ItemRequest request1 = new ItemRequest();
+        request1.setDescription("Request 1");
+        request1.setOwner(user1.getId());
+        itemRequestRepository.save(request1);
+        ItemRequest request2 = new ItemRequest();
+        request2.setDescription("Request 2");
+        request2.setOwner(user1.getId());
+        itemRequestRepository.save(request2);
+        ItemRequest request3 = new ItemRequest();
+        request3.setDescription("Request 3");
+        request3.setOwner(user2.getId());
+        itemRequestRepository.save(request3);
+
+        assertThrows(BadRequest.class, () -> itemRequestService.getUserRequests(user1.getId(), 0, 0));
     }
 }

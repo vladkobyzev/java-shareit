@@ -8,8 +8,7 @@ import ru.practicum.shareit.booking.dto.ReceivedBookingDto;
 import ru.practicum.shareit.booking.dto.SentBookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repositories.BookingRepository;
-import ru.practicum.shareit.exceptions.EntityNotFound;
-import ru.practicum.shareit.exceptions.InappropriateUser;
+import ru.practicum.shareit.exceptions.*;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repositories.ItemRepository;
 import ru.practicum.shareit.user.model.User;
@@ -25,8 +24,6 @@ import java.util.List;
 @SpringBootTest
 @Transactional
 public class BookingServiceImplIntegrationTest {
-
-
     @Autowired
     private BookingService bookingService;
 
@@ -40,7 +37,7 @@ public class BookingServiceImplIntegrationTest {
     private ItemRepository itemRepository;
 
     @Test
-    public void getBooking_withValidBookingIdAndBooker_returnsSentBookingDto() {
+    public void getBooking_withValidBookingIdAndBooker_shouldReturnSentBookingDto() {
         User booker = new User();
         booker.setName("John");
         booker.setEmail("test@gmail.com");
@@ -111,7 +108,7 @@ public class BookingServiceImplIntegrationTest {
     }
 
     @Test
-    public void testCreateBooking_ValidBooking() {
+    public void testCreateBooking_validBooking_success() {
         User booker = new User();
         booker.setName("John");
         booker.setEmail("test@gmail.com");
@@ -146,7 +143,72 @@ public class BookingServiceImplIntegrationTest {
     }
 
     @Test
-    void updateBookingStatus_WithValidRequest_ShouldUpdateBookingStatus() {
+    public void testCreateBooking_invalidBookingTimeRequest_shouldThrowItemIsUnavailable() {
+        User booker = new User();
+        booker.setName("John");
+        booker.setEmail("test@gmail.com");
+        userRepository.save(booker);
+
+        User owner = new User();
+        owner.setName("ownercxcvXV");
+        owner.setEmail("ownerxcvvc@gmail.com");
+        userRepository.save(owner);
+
+        Item item = new Item();
+        item.setName("Item 1");
+        item.setDescription("Description 1");
+        item.setOwner(owner.getId());
+        item.setAvailable(false);
+        itemRepository.save(item);
+
+        ReceivedBookingDto bookingDto = new ReceivedBookingDto();
+        bookingDto.setItemId(item.getId());
+        bookingDto.setStart(LocalDateTime.now().plusHours(1));
+        bookingDto.setEnd(LocalDateTime.now().plusHours(4));
+
+        assertThrows(ItemIsUnavailable.class, () -> bookingService.createBooking(bookingDto, booker.getId()));
+    }
+
+    @Test
+    public void testCreateBooking_unavailableItem_shouldThrowBadRequest() {
+        User booker = new User();
+        booker.setName("John");
+        booker.setEmail("test@gmail.com");
+        userRepository.save(booker);
+
+
+        ReceivedBookingDto bookingDto = new ReceivedBookingDto();
+        bookingDto.setItemId(1L);
+        bookingDto.setStart(null);
+        bookingDto.setEnd(null);
+
+        assertThrows(BadRequest.class, () -> bookingService.createBooking(bookingDto, booker.getId()));
+    }
+
+    @Test
+    public void testCreateBooking_shouldThrowInappropriateUser() {
+        User booker = new User();
+        booker.setName("John");
+        booker.setEmail("test@gmail.com");
+        userRepository.save(booker);
+
+        Item item = new Item();
+        item.setName("Item 1");
+        item.setDescription("Description 1");
+        item.setOwner(booker.getId());
+        item.setAvailable(true);
+        itemRepository.save(item);
+
+        ReceivedBookingDto bookingDto = new ReceivedBookingDto();
+        bookingDto.setItemId(item.getId());
+        bookingDto.setStart(LocalDateTime.now().plusHours(1));
+        bookingDto.setEnd(LocalDateTime.now().plusHours(4));
+
+        assertThrows(InappropriateUser.class, () -> bookingService.createBooking(bookingDto, booker.getId()));
+    }
+
+    @Test
+    void updateBookingStatus_withValidRequest_shouldUpdateBookingStatus() {
         LocalDateTime now = LocalDateTime.now();
         User user = new User();
         user.setName("John");
@@ -183,7 +245,7 @@ public class BookingServiceImplIntegrationTest {
     }
 
     @Test
-    void updateBookingStatus_WithInvalidBookingId_ShouldThrowEntityNotFoundException() {
+    void updateBookingStatus_withInvalidBookingId_shouldThrowEntityNotFoundException() {
         long invalidBookingId = 100L;
         String newStatus = BookingStatus.APPROVED.toString().toLowerCase();
 
@@ -191,7 +253,7 @@ public class BookingServiceImplIntegrationTest {
     }
 
     @Test
-    void updateBookingStatus_WithInappropriateUser_ShouldThrowInappropriateUserException() {
+    void updateBookingStatus_withInappropriateUser_shouldThrowInappropriateUserException() {
         LocalDateTime now = LocalDateTime.now();
         User user = new User();
         user.setName("John");
@@ -222,6 +284,39 @@ public class BookingServiceImplIntegrationTest {
         String newStatus = BookingStatus.APPROVED.toString().toLowerCase();
 
         assertThrows(InappropriateUser.class, () -> bookingService.updateBookingStatus(b1.getId(), newStatus, 999L));
+    }
+
+    @Test
+    void updateBookingStatus_withRejectedBooking_shouldThrowBookingStatusAlreadySet() {
+        LocalDateTime now = LocalDateTime.now();
+        User user = new User();
+        user.setName("John");
+        user.setEmail("john@example.com");
+        userRepository.save(user);
+
+        User booker = new User();
+        booker.setName("booker");
+        booker.setEmail("booker@example.com");
+        userRepository.save(booker);
+
+        Item item = new Item();
+        item.setName("Item 1");
+        item.setDescription("Description 1");
+        item.setAvailable(true);
+        item.setOwner(user.getId());
+        itemRepository.save(item);
+
+        Booking b1 = new Booking();
+        b1.setBooker(booker);
+        b1.setStart(now.minusHours(2));
+        b1.setEnd(now.minusHours(1));
+        b1.setStatus(BookingStatus.REJECTED);
+        b1.setItem(item);
+        bookingRepository.save(b1);
+
+        String newStatus = "true";
+
+        assertThrows(BookingStatusAlreadySet.class, () -> bookingService.updateBookingStatus(b1.getId(), newStatus, user.getId()));
     }
 
     @Test
@@ -341,5 +436,28 @@ public class BookingServiceImplIntegrationTest {
 
         assertThat(actualBookingsUser).isNotNull();
         assertEquals(actualBookingsUser.get(0).getId(), b4.getId());
+    }
+
+    @Test
+    void getAllUserBookings_withInvalidStatus_shouldThrowUnsupportedStatus() {
+        String invalidStatus = "INVALID";
+        User user = new User();
+        user.setName("asd");
+        user.setEmail("asd@example.com");
+        userRepository.save(user);
+
+        assertThrows(UnsupportedStatus.class, () -> bookingService.getAllUserBookings(user.getId(), invalidStatus, "OWNER", 1, 2));
+    }
+
+    @Test
+    void getAllUserBookings_withInvalidUserId_shouldThrowEntityNotFound() {
+        String invalidStatus = "ALL";
+        User user = new User();
+        user.setName("asd");
+        user.setEmail("asd@example.com");
+        userRepository.save(user);
+        long invalidUserId = 1000L;
+
+        assertThrows(EntityNotFound.class, () -> bookingService.getAllUserBookings(invalidUserId, invalidStatus, "OWNER", 1, 2));
     }
 }

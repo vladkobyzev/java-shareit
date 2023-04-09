@@ -142,6 +142,35 @@ public class BookingServiceImplTest {
     }
 
     @Test
+    public void testGetAllOwnerBookings_noPagination_success() {
+        long userId = 1L;
+        Integer from = null;
+        Integer size = null;
+        String state = "ALL";
+        LocalDateTime now = LocalDateTime.now();
+
+        List<Booking> bookings = new ArrayList<>();
+        Booking b1 = new Booking();
+        b1.setStart(now.minusHours(2));
+        b1.setEnd(now.minusHours(1));
+        b1.setStatus(BookingStatus.WAITING);
+        bookings.add(b1);
+
+        Booking b2 = new Booking();
+        b2.setStart(now.plusHours(1));
+        b2.setEnd(now.plusHours(3));
+        b2.setStatus(BookingStatus.APPROVED);
+        bookings.add(b2);
+
+        when(bookingRepository.findAllOwnerBookingsByState(userId, state)).thenReturn(bookings);
+
+        List<SentBookingDto> result = bookingService.getAllUserBookings(userId, state, "OWNER", from, size);
+
+        assertEquals(2, result.size());
+        verify(bookingRepository, times(1)).findAllOwnerBookingsByState(userId, state);
+    }
+
+    @Test
     public void testGetAllUserBookings_withPagination_success() {
         long userId = 1L;
         int from = 0;
@@ -172,6 +201,40 @@ public class BookingServiceImplTest {
 
         assertEquals(2, result.size());
         verify(bookingRepository, times(1)).findAllUserBookingsByState(userId, state,
+                PageRequest.of(from, size));
+    }
+
+    @Test
+    public void testGetAllOwnerBookings_withPagination_success() {
+        long userId = 1L;
+        int from = 0;
+        int size = 1;
+        String state = "ALL";
+        LocalDateTime now = LocalDateTime.now();
+
+        List<Booking> bookings = new ArrayList<>();
+        Booking b1 = new Booking();
+        b1.setStart(now.minusHours(2));
+        b1.setEnd(now.minusHours(1));
+        b1.setStatus(BookingStatus.WAITING);
+        bookings.add(b1);
+
+        Booking b2 = new Booking();
+        b2.setStart(now.plusHours(1));
+        b2.setEnd(now.plusHours(3));
+        b2.setStatus(BookingStatus.APPROVED);
+        bookings.add(b2);
+
+
+
+        Slice<Booking> requestPage = new PageImpl<>(bookings);
+        when(bookingRepository.findAllOwnerBookingsByState(userId, state,
+                PageRequest.of(from, size))).thenReturn(requestPage);
+
+        List<SentBookingDto> result = bookingService.getAllUserBookings(userId, state, "OWNER", from, size);
+
+        assertEquals(2, result.size());
+        verify(bookingRepository, times(1)).findAllOwnerBookingsByState(userId, state,
                 PageRequest.of(from, size));
     }
 
