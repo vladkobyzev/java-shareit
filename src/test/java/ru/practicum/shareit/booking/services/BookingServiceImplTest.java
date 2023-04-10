@@ -60,7 +60,6 @@ public class BookingServiceImplTest {
         SentBookingDto result = bookingService.getBooking(BOOKING_ID, USER_ID);
 
         assertNotNull(result);
-
     }
 
     @Test()
@@ -239,7 +238,6 @@ public class BookingServiceImplTest {
         bookings.add(b2);
 
 
-
         Slice<Booking> requestPage = new PageImpl<>(bookings);
         when(bookingRepository.findAllOwnerBookingsByState(userId, state,
                 PageRequest.of(from, size))).thenReturn(requestPage);
@@ -247,6 +245,72 @@ public class BookingServiceImplTest {
         List<SentBookingDto> result = bookingService.getAllUserBookings(userId, state, "OWNER", from, size);
 
         assertEquals(2, result.size());
+        verify(bookingRepository, times(1)).findAllOwnerBookingsByState(userId, state,
+                PageRequest.of(from, size));
+    }
+
+    @Test
+    public void testGetAllPastOwnerBookings_withPagination_success() {
+        long userId = 1L;
+        int from = 0;
+        int size = 1;
+        String state = "PAST";
+        LocalDateTime now = LocalDateTime.now();
+
+        List<Booking> bookings = new ArrayList<>();
+        Booking b1 = new Booking();
+        b1.setStart(now.minusHours(2));
+        b1.setEnd(now.minusHours(1));
+        b1.setStatus(BookingStatus.WAITING);
+        bookings.add(b1);
+
+        Booking b2 = new Booking();
+        b2.setStart(now.plusHours(1));
+        b2.setEnd(now.plusHours(3));
+        b2.setStatus(BookingStatus.APPROVED);
+        bookings.add(b2);
+
+
+        Slice<Booking> requestPage = new PageImpl<>(List.of(b1));
+        when(bookingRepository.findAllOwnerBookingsByState(userId, state,
+                PageRequest.of(from, size))).thenReturn(requestPage);
+
+        List<SentBookingDto> result = bookingService.getAllUserBookings(userId, state, "OWNER", from, size);
+
+        assertEquals(1, result.size());
+        verify(bookingRepository, times(1)).findAllOwnerBookingsByState(userId, state,
+                PageRequest.of(from, size));
+    }
+
+    @Test
+    public void testGetAllFutureOwnerBookings_withPagination_success() {
+        long userId = 1L;
+        int from = 0;
+        int size = 1;
+        String state = "FUTURE";
+        LocalDateTime now = LocalDateTime.now();
+
+        List<Booking> bookings = new ArrayList<>();
+        Booking b1 = new Booking();
+        b1.setStart(now.minusHours(2));
+        b1.setEnd(now.minusHours(1));
+        b1.setStatus(BookingStatus.WAITING);
+        bookings.add(b1);
+
+        Booking b2 = new Booking();
+        b2.setStart(now.plusHours(1));
+        b2.setEnd(now.plusHours(3));
+        b2.setStatus(BookingStatus.APPROVED);
+        bookings.add(b2);
+
+
+        Slice<Booking> requestPage = new PageImpl<>(List.of(b2));
+        when(bookingRepository.findAllOwnerBookingsByState(userId, state,
+                PageRequest.of(from, size))).thenReturn(requestPage);
+
+        List<SentBookingDto> result = bookingService.getAllUserBookings(userId, state, "OWNER", from, size);
+
+        assertEquals(1, result.size());
         verify(bookingRepository, times(1)).findAllOwnerBookingsByState(userId, state,
                 PageRequest.of(from, size));
     }
@@ -260,6 +324,23 @@ public class BookingServiceImplTest {
         bookingDto.setItemId(item.getId());
         bookingDto.setStart(LocalDateTime.now().plusHours(2));
         bookingDto.setEnd(LocalDateTime.now().minusHours(5));
+        long userId = 2L;
+
+        final BadRequest exception = assertThrows(BadRequest.class,
+                () -> bookingService.createBooking(bookingDto, userId));
+
+        assertEquals(exception.getMessage(), "Not valid fields");
+    }
+
+    @Test
+    public void testCreateBooking_withNullBookingDate_shouldThrowBadRequest() {
+        ReceivedBookingDto bookingDto = new ReceivedBookingDto();
+        Item item = new Item();
+        item.setId(1L);
+        item.setOwner(1L);
+        bookingDto.setItemId(item.getId());
+        bookingDto.setStart(null);
+        bookingDto.setEnd(null);
         long userId = 2L;
 
         final BadRequest exception = assertThrows(BadRequest.class,

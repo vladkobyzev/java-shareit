@@ -129,7 +129,7 @@ public class UserServiceImplTest {
         UserDto updatUserDto = new UserDto();
         updatUserDto.setName("John Update");
         updatUserDto.setEmail("jane@example.com");
-        when(userRepository.existsById(userId)).thenReturn(true);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
         when(userRepository.findByEmail(updatUserDto.getEmail())).thenReturn(Optional.of(existingUser1));
 
 
@@ -216,5 +216,21 @@ public class UserServiceImplTest {
         when(userRepository.findAll()).thenReturn(Collections.emptyList());
         List<UserDto> users = userService.getAllUsers();
         assertEquals(0, users.size());
+    }
+
+    @Test
+    public void testIsExistUser_success() {
+        when(userRepository.existsById(anyLong())).thenReturn(true);
+
+        userService.isExistUser(1L);
+
+        verify(userRepository).existsById(1L);
+    }
+
+    @Test
+    public void testIsExistUser_shouldTrowEntityNotFound() {
+        when(userRepository.existsById(anyLong())).thenReturn(false);
+
+        assertThrows(EntityNotFound.class, () -> userService.isExistUser(1L));
     }
 }

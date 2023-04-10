@@ -26,10 +26,7 @@ import ru.practicum.shareit.util.BookingStatus;
 import static org.mockito.ArgumentMatchers.any;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -55,12 +52,39 @@ class ItemServiceImplTest {
     ItemServiceImpl itemService;
 
     @Test
-    void updateItem_WithValidData_ShouldUpdateItem() {
+    void updateItem_WithValidData_ShouldUpdateItemDescription() {
+        long itemId = 1L;
+        long userId = 2L;
+        ItemDto itemDto = new ItemDto();
+        itemDto.setDescription("new description");
+
+        Item item = new Item();
+        item.setId(itemId);
+        item.setName("name");
+        item.setDescription("old description");
+        item.setOwner(userId);
+
+        ItemDto itemDto1 = new ItemDto();
+        itemDto1.setId(itemId);
+        itemDto1.setName("name");
+        itemDto1.setDescription("new description");
+
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
+        when(itemRepository.save(item)).thenReturn(item);
+        when(modelMapper.map(item, ItemDto.class)).thenReturn(itemDto1);
+
+        ItemDto updatedItem = itemService.updateItem(itemDto, itemId, userId);
+
+        assertEquals(itemDto.getDescription(), updatedItem.getDescription());
+        verify(itemRepository).save(item);
+    }
+
+    @Test
+    void updateItem_WithValidData_ShouldUpdateItemName() {
         long itemId = 1L;
         long userId = 2L;
         ItemDto itemDto = new ItemDto();
         itemDto.setName("new name");
-        itemDto.setDescription("new description");
 
         Item item = new Item();
         item.setId(itemId);
@@ -71,7 +95,7 @@ class ItemServiceImplTest {
         ItemDto itemDto1 = new ItemDto();
         itemDto1.setId(itemId);
         itemDto1.setName("new name");
-        itemDto1.setDescription("new description");
+        item.setDescription("old description");
 
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
         when(itemRepository.save(item)).thenReturn(item);
@@ -80,7 +104,36 @@ class ItemServiceImplTest {
         ItemDto updatedItem = itemService.updateItem(itemDto, itemId, userId);
 
         assertEquals(itemDto.getName(), updatedItem.getName());
-        assertEquals(itemDto.getDescription(), updatedItem.getDescription());
+        verify(itemRepository).save(item);
+    }
+
+    @Test
+    void updateItem_WithValidData_ShouldUpdateItemAvailable() {
+        long itemId = 1L;
+        long userId = 2L;
+        ItemDto itemDto = new ItemDto();
+        itemDto.setAvailable(true);
+
+        Item item = new Item();
+        item.setId(itemId);
+        item.setName("old name");
+        item.setDescription("old description");
+        item.setOwner(userId);
+        item.setAvailable(false);
+
+        ItemDto itemDto1 = new ItemDto();
+        itemDto1.setId(itemId);
+        itemDto1.setName("old name");
+        itemDto1.setDescription("old description");
+        itemDto1.setAvailable(true);
+
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
+        when(itemRepository.save(item)).thenReturn(item);
+        when(modelMapper.map(item, ItemDto.class)).thenReturn(itemDto1);
+
+        ItemDto updatedItem = itemService.updateItem(itemDto, itemId, userId);
+
+        assertEquals(itemDto.getAvailable(), updatedItem.getAvailable());
         verify(itemRepository).save(item);
     }
 
@@ -224,6 +277,18 @@ class ItemServiceImplTest {
         List<ItemDto> result = itemService.searchItemByText(text);
 
         assertEquals(items.size(), result.size());
+        verify(itemRepository, times(1)).searchItemByText(text);
+    }
+
+    @Test
+    public void testSearchItemByTextWhenTextIsNotBlankAndItemsNotExist_shouldReturnEmptyList() {
+        String text = "search text";
+
+        when(itemRepository.searchItemByText(text)).thenReturn(Collections.emptyList());
+
+        List<ItemDto> result = itemService.searchItemByText(text);
+
+        assertTrue(result.isEmpty());
         verify(itemRepository, times(1)).searchItemByText(text);
     }
 

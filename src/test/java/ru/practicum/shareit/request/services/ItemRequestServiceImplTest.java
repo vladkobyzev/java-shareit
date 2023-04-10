@@ -19,6 +19,7 @@ import ru.practicum.shareit.user.services.UserService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -131,6 +132,18 @@ class ItemRequestServiceImplTest {
         assertEquals(requests.size(), result.size());
     }
 
+    @Test
+    public void testGetOwnerRequests_shouldReturnEmptyList() {
+        long ownerId = 1;
+
+        doNothing().when(userService).isExistUser(ownerId);
+        when(requestRepository.findAllByOwner(ownerId)).thenReturn(Collections.emptyList());
+
+        List<ItemRequestDto> result = requestService.getOwnerRequests(ownerId);
+        assertTrue(result.isEmpty());
+        verify(requestRepository).findAllByOwner(ownerId);
+    }
+
 
     @Test
     public void testGetOwnerRequestsInvalidUser() {
@@ -181,6 +194,30 @@ class ItemRequestServiceImplTest {
         List<ItemRequestDto> result = requestService.getUserRequests(userId, 1, 1);
 
         assertEquals(2, result.size());
+        verify(requestRepository, times(1)).findAllByOwnerNot(userId, PageRequest.of(1, 1, Sort.by("created").ascending()));
+    }
+
+    @Test
+    public void testGetUserRequests_noPagination_shouldReturnEmptyList() {
+        long userId = 1L;
+
+        when(requestRepository.findAllByOwner(userId)).thenReturn(Collections.emptyList());
+
+        List<ItemRequestDto> result = requestService.getUserRequests(userId, null, null);
+
+        assertTrue(result.isEmpty());
+        verify(requestRepository, times(1)).findAllByOwner(userId);
+    }
+
+    @Test
+    public void testGetUserRequests_withPagination_shouldReturnEmptyList() {
+        long userId = 1L;
+
+        when(requestRepository.findAllByOwnerNot(userId, PageRequest.of(1, 1, Sort.by("created").ascending()))).thenReturn(Collections.emptyList());
+
+        List<ItemRequestDto> result = requestService.getUserRequests(userId, 1, 1);
+
+        assertTrue(result.isEmpty());
         verify(requestRepository, times(1)).findAllByOwnerNot(userId, PageRequest.of(1, 1, Sort.by("created").ascending()));
     }
 
