@@ -173,4 +173,25 @@ public class UserServiceImplIntegrationTest {
 
         assertThrows(EntityNotFound.class, () -> userService.isExistUser(user.getId()));
     }
+
+    @Test
+    public void testGetUserById_shouldTrowException() {
+        User user = new User();
+        user.setId(1L);
+        user.setName("test1");
+        user.setEmail("test1@example.com");
+
+        assertThrows(EntityNotFound.class, () -> userService.getUserById(user.getId()));
+    }
+
+    @Test
+    public void testGetUserById_Success() {
+        User user = new User();
+        user.setName("test1");
+        user.setEmail("test1@example.com");
+        User savedUser = userRepository.save(user);
+
+        User userFromDb = userService.getUserById(savedUser.getId());
+        assertEquals(userFromDb.getEmail(), user.getEmail());
+    }
 }

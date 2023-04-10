@@ -370,6 +370,77 @@ class ItemServiceImplTest {
     }
 
     @Test
+    public void testGetItems_withoutNextBooking_success() {
+        long ownerId = 1L;
+        Integer from = null;
+        Integer size = null;
+
+        List<Item> items = new ArrayList<>();
+        Item item1 = new Item();
+        item1.setId(1L);
+        item1.setName("Item 1");
+        item1.setDescription("Description 1");
+        items.add(item1);
+        Item item2 = new Item();
+        item2.setId(2L);
+        item2.setName("Item 2");
+        item2.setDescription("Description 2");
+        items.add(item2);
+        ItemDto itemDto1 = new ItemDto();
+        itemDto1.setId(item1.getId());
+        ItemDto itemDto2 = new ItemDto();
+        itemDto2.setId(item2.getId());
+
+        when(itemRepository.findAllByOwner(ownerId)).thenReturn(items);
+        when(bookingRepository.findAllNextBooking(eq(List.of(item1.getId(), item2.getId())), any(LocalDateTime.class)))
+                .thenReturn(Collections.emptyList());
+        when(modelMapper.map(item1, ItemDto.class)).thenReturn(itemDto1);
+        when(modelMapper.map(item2, ItemDto.class)).thenReturn(itemDto2);
+
+        List<ItemDto> itemsDto = itemService.getItems(ownerId, from, size);
+        assertEquals(items.size(), itemsDto.size());
+        assertEquals(item1.getId(), itemsDto.get(0).getId());
+        assertEquals(item2.getId(), itemsDto.get(1).getId());
+        assertNull(itemsDto.get(0).getNextBooking());
+        assertNull(itemsDto.get(1).getNextBooking());
+    }
+    @Test
+    public void testGetItems_withoutLastBooking_success() {
+        long ownerId = 1L;
+        Integer from = null;
+        Integer size = null;
+
+        List<Item> items = new ArrayList<>();
+        Item item1 = new Item();
+        item1.setId(1L);
+        item1.setName("Item 1");
+        item1.setDescription("Description 1");
+        items.add(item1);
+        Item item2 = new Item();
+        item2.setId(2L);
+        item2.setName("Item 2");
+        item2.setDescription("Description 2");
+        items.add(item2);
+        ItemDto itemDto1 = new ItemDto();
+        itemDto1.setId(item1.getId());
+        ItemDto itemDto2 = new ItemDto();
+        itemDto2.setId(item2.getId());
+
+        when(itemRepository.findAllByOwner(ownerId)).thenReturn(items);
+        when(bookingRepository.findAllLastBooking(eq(List.of(item1.getId(), item2.getId())), any(LocalDateTime.class)))
+                .thenReturn(Collections.emptyList());
+        when(modelMapper.map(item1, ItemDto.class)).thenReturn(itemDto1);
+        when(modelMapper.map(item2, ItemDto.class)).thenReturn(itemDto2);
+
+        List<ItemDto> itemsDto = itemService.getItems(ownerId, from, size);
+        assertEquals(items.size(), itemsDto.size());
+        assertEquals(item1.getId(), itemsDto.get(0).getId());
+        assertEquals(item2.getId(), itemsDto.get(1).getId());
+        assertNull(itemsDto.get(0).getLastBooking());
+        assertNull(itemsDto.get(1).getLastBooking());
+    }
+
+    @Test
     public void testGetItems_withPagination_invalidPageRequest_shouldThrowBedRequest() {
         long ownerId = 1L;
         int from = 0;
@@ -481,5 +552,29 @@ class ItemServiceImplTest {
         long userId = 1L;
 
         assertThrows(EntityNotFound.class, () -> itemService.getItemDtoById(itemId, userId));
+    }
+
+    @Test
+    public void testGetItemById_shouldThrowEntityNotFound() {
+        long itemId = 1L;
+
+        assertThrows(EntityNotFound.class, () -> itemService.getItemById(itemId));
+    }
+
+    @Test
+    public void testGetItemById_success() {
+        long itemId = 1L;
+
+        Item item = new Item();
+        item.setId(itemId);
+        item.setDescription("text");
+        item.setAvailable(true);
+
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
+
+        Item actual = itemService.getItemById(itemId);
+
+        assertEquals(itemId, actual.getId());
+        verify(itemRepository, times(1)).findById(itemId);
     }
 }

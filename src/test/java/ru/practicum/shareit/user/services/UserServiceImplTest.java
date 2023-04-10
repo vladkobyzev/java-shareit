@@ -233,4 +233,28 @@ public class UserServiceImplTest {
 
         assertThrows(EntityNotFound.class, () -> userService.isExistUser(1L));
     }
+
+    @Test
+    public void testGetUserById_shouldThrowEntityNotFound() {
+        long itemId = 1L;
+
+        assertThrows(EntityNotFound.class, () -> userService.getUserById(itemId));
+    }
+
+    @Test
+    public void testGetUserById_success() {
+        long userId = 1L;
+
+        User user = new User();
+        user.setId(userId);
+        user.setName("John");
+        user.setEmail("john@example.com");
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        User actual = userService.getUserById(userId);
+
+        assertEquals(userId, actual.getId());
+        verify(userRepository, times(1)).findById(userId);
+    }
 }
