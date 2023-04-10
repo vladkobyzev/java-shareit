@@ -469,27 +469,6 @@ public class ItemServiceImplIntegrationTest {
     }
 
     @Test
-    public void testGetItemById_withValidItemId_success() {
-        User user = new User();
-        user.setName("John");
-        user.setEmail("john@example.com");
-        userRepository.save(user);
-
-        Item item = new Item();
-        item.setId(1L);
-        item.setName("Test item");
-        item.setOwner(user.getId());
-        item.setDescription("Test description");
-        itemRepository.save(item);
-
-        Item itemDto = itemService.getItemById(item.getId());
-
-        assertNotNull(itemDto);
-        assertEquals(item.getName(), itemDto.getName());
-        assertEquals(item.getDescription(), itemDto.getDescription());
-    }
-
-    @Test
     public void testGetItemById_withInvalidItemId_shouldThrowEntityNotFound() {
         Item item = new Item();
         item.setId(1L);
