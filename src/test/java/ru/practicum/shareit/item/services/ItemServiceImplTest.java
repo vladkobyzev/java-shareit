@@ -273,6 +273,38 @@ class ItemServiceImplTest {
     }
 
     @Test
+    public void testGetItems_withoutPagination_success() {
+        long ownerId = 1L;
+        Integer from = null;
+        Integer size = null;
+
+        List<Item> items = new ArrayList<>();
+        Item item1 = new Item();
+        item1.setId(1L);
+        item1.setName("Item 1");
+        item1.setDescription("Description 1");
+        items.add(item1);
+        Item item2 = new Item();
+        item2.setId(2L);
+        item2.setName("Item 2");
+        item2.setDescription("Description 2");
+        items.add(item2);
+        ItemDto itemDto1 = new ItemDto();
+        itemDto1.setId(item1.getId());
+        ItemDto itemDto2 = new ItemDto();
+        itemDto2.setId(item2.getId());
+
+        when(itemRepository.findAllByOwner(ownerId)).thenReturn(items);
+        when(modelMapper.map(item1, ItemDto.class)).thenReturn(itemDto1);
+        when(modelMapper.map(item2, ItemDto.class)).thenReturn(itemDto2);
+
+        List<ItemDto> itemsDto = itemService.getItems(ownerId, from, size);
+        assertEquals(items.size(), itemsDto.size());
+        assertEquals(item1.getId(), itemsDto.get(0).getId());
+        assertEquals(item2.getId(), itemsDto.get(1).getId());
+    }
+
+    @Test
     public void testGetItems_withPagination_invalidPageRequest_shouldThrowBedRequest() {
         long ownerId = 1L;
         int from = 0;
@@ -282,7 +314,7 @@ class ItemServiceImplTest {
     }
 
     @Test
-    public void testGetItemDtoById_success() {
+    public void testGetItemDtoById_withBookingDate_success() {
         long itemId = 1L;
         long userId = 2L;
         LocalDateTime now = LocalDateTime.now();
@@ -345,6 +377,36 @@ class ItemServiceImplTest {
         assertEquals(expectedDto.getLastBooking(), actualDto.getLastBooking());
         assertEquals(expectedDto.getNextBooking(), actualDto.getNextBooking());
 
+        verify(itemRepository, times(1)).findById(itemId);
+    }
+
+    @Test
+    public void testGetItemDtoById_withoutBookingDate_success() {
+        long itemId = 1L;
+        long ownerId = 2L;
+        long userId = 3L;
+
+        Item item = new Item();
+        item.setId(itemId);
+        item.setOwner(ownerId);
+        item.setDescription("text");
+        item.setAvailable(true);
+
+
+        ItemDto expectedDto = new ItemDto();
+        expectedDto.setId(itemId);
+        expectedDto.setDescription("text");
+        expectedDto.setAvailable(true);
+
+
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
+        when(modelMapper.map(item, ItemDto.class)).thenReturn(expectedDto);
+
+        ItemDto actualDto = itemService.getItemDtoById(itemId, userId);
+
+        assertEquals(expectedDto.getId(), actualDto.getId());
+
+        verifyNoInteractions(bookingRepository);
         verify(itemRepository, times(1)).findById(itemId);
     }
 

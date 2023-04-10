@@ -208,7 +208,7 @@ public class BookingServiceImplIntegrationTest {
     }
 
     @Test
-    void updateBookingStatus_withValidRequest_shouldUpdateBookingStatus() {
+    void updateBookingStatus_withValidRequest_shouldUpdateBookingStatusApproved() {
         LocalDateTime now = LocalDateTime.now();
         User user = new User();
         user.setName("John");
@@ -242,6 +242,43 @@ public class BookingServiceImplIntegrationTest {
 
 
         assertEquals(BookingStatus.APPROVED, updatedBooking.getStatus());
+    }
+
+    @Test
+    void updateBookingStatus_withValidRequest_shouldUpdateBookingStatusRejected() {
+        LocalDateTime now = LocalDateTime.now();
+        User user = new User();
+        user.setName("John");
+        user.setEmail("john@example.com");
+        userRepository.save(user);
+
+        User booker = new User();
+        booker.setName("booker");
+        booker.setEmail("booker@example.com");
+        userRepository.save(booker);
+
+        Item item = new Item();
+        item.setName("Item 1");
+        item.setDescription("Description 1");
+        item.setAvailable(true);
+        item.setOwner(user.getId());
+        itemRepository.save(item);
+
+        Booking b1 = new Booking();
+        b1.setBooker(user);
+        b1.setStart(now.minusHours(2));
+        b1.setEnd(now.minusHours(1));
+        b1.setStatus(BookingStatus.WAITING);
+        b1.setItem(item);
+        b1.setBooker(booker);
+        bookingRepository.save(b1);
+
+        String newStatus = "false";
+
+        SentBookingDto updatedBooking = bookingService.updateBookingStatus(b1.getId(), newStatus, user.getId());
+
+
+        assertEquals(BookingStatus.REJECTED, updatedBooking.getStatus());
     }
 
     @Test

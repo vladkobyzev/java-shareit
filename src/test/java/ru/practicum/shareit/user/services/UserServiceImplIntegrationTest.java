@@ -163,4 +163,14 @@ public class UserServiceImplIntegrationTest {
 
         assertThrows(EntityNotFound.class, () -> userService.getUserDtoById(user.getId()));
     }
+
+    @Test
+    public void testisExistUser_shouldTrowException() {
+        User user = new User();
+        user.setId(1L);
+        user.setName("test1");
+        user.setEmail("test1@example.com");
+
+        assertThrows(EntityNotFound.class, () -> userService.isExistUser(user.getId()));
+    }
 }

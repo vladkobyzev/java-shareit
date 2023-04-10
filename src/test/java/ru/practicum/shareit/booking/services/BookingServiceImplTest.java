@@ -113,6 +113,19 @@ public class BookingServiceImplTest {
     }
 
     @Test
+    public void testGetAllUserBookings_withPagination_shouldThrowBadRequest() {
+        long invalidUserId = 100L;
+        String state = "ALL";
+        String userType = "USER";
+        Integer from = 0;
+        Integer size = 0;
+
+        doNothing().when(userService).isExistUser(invalidUserId);
+
+        assertThrows(BadRequest.class, () -> bookingService.getAllUserBookings(invalidUserId, state, userType, from, size));
+    }
+
+    @Test
     public void testGetAllUserBookings_noPagination_success() {
         long userId = 1L;
         Integer from = null;
@@ -344,7 +357,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void testUpdateBookingStatus_withValidRequest_returnsSentBookingDto() {
+    public void testUpdateBookingStatus_withValidRequest_returnsSentBookingDtoApproved() {
         long bookingId = 1L;
         String approved = "true";
         long userId = 2L;
@@ -372,6 +385,37 @@ public class BookingServiceImplTest {
         verify(bookingRepository).save(any(Booking.class));
         assertEquals(bookingId, sentBookingDto.getId());
         assertEquals("APPROVED", sentBookingDto.getStatus().name());
+    }
+
+    @Test
+    public void testUpdateBookingStatus_withValidRequest_returnsSentBookingDtoRejected() {
+        long bookingId = 1L;
+        String approved = "false";
+        long userId = 2L;
+
+        Item item = new Item();
+        item.setId(1L);
+        item.setOwner(userId);
+
+        Booking booking = new Booking();
+        booking.setId(bookingId);
+        booking.setItem(item);
+        booking.setStatus(BookingStatus.WAITING);
+
+        SentBookingDto updatedBooking = new SentBookingDto();
+        updatedBooking.setId(bookingId);
+        updatedBooking.setItem(item);
+        updatedBooking.setStatus(BookingStatus.REJECTED);
+
+        when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(booking));
+        when(bookingRepository.save(booking)).thenReturn(booking);
+        when(modelMapper.map(booking, SentBookingDto.class)).thenReturn(updatedBooking);
+
+        SentBookingDto sentBookingDto = bookingService.updateBookingStatus(bookingId, approved, userId);
+
+        verify(bookingRepository).save(any(Booking.class));
+        assertEquals(bookingId, sentBookingDto.getId());
+        assertEquals("REJECTED", sentBookingDto.getStatus().name());
     }
 
     @Test
