@@ -404,6 +404,7 @@ class ItemServiceImplTest {
         assertNull(itemsDto.get(0).getNextBooking());
         assertNull(itemsDto.get(1).getNextBooking());
     }
+
     @Test
     public void testGetItems_withoutLastBooking_success() {
         long ownerId = 1L;
