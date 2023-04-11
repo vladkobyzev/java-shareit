@@ -208,7 +208,7 @@ public class BookingServiceImplIntegrationTest {
     }
 
     @Test
-    void updateBookingStatus_withValidRequest_shouldUpdateBookingStatusApproved() {
+    public void updateBookingStatus_withValidRequest_shouldUpdateBookingStatusApproved() {
         LocalDateTime now = LocalDateTime.now();
         User user = new User();
         user.setName("John");
@@ -245,7 +245,7 @@ public class BookingServiceImplIntegrationTest {
     }
 
     @Test
-    void updateBookingStatus_withValidRequest_shouldUpdateBookingStatusRejected() {
+    public void updateBookingStatus_withValidRequest_shouldUpdateBookingStatusRejected() {
         LocalDateTime now = LocalDateTime.now();
         User user = new User();
         user.setName("John");
@@ -282,7 +282,7 @@ public class BookingServiceImplIntegrationTest {
     }
 
     @Test
-    void updateBookingStatus_withInvalidBookingId_shouldThrowEntityNotFoundException() {
+    public void updateBookingStatus_withInvalidBookingId_shouldThrowEntityNotFoundException() {
         long invalidBookingId = 100L;
         String newStatus = BookingStatus.APPROVED.toString().toLowerCase();
 
@@ -290,7 +290,7 @@ public class BookingServiceImplIntegrationTest {
     }
 
     @Test
-    void updateBookingStatus_withInappropriateUser_shouldThrowInappropriateUserException() {
+    public void updateBookingStatus_withInappropriateUser_shouldThrowInappropriateUserException() {
         LocalDateTime now = LocalDateTime.now();
         User user = new User();
         user.setName("John");
@@ -324,7 +324,7 @@ public class BookingServiceImplIntegrationTest {
     }
 
     @Test
-    void updateBookingStatus_withRejectedBooking_shouldThrowBookingStatusAlreadySet() {
+    public void updateBookingStatus_withRejectedBooking_shouldThrowBookingStatusAlreadySet() {
         LocalDateTime now = LocalDateTime.now();
         User user = new User();
         user.setName("John");
@@ -357,7 +357,7 @@ public class BookingServiceImplIntegrationTest {
     }
 
     @Test
-    void getAllUserBookings_WithValidData_ShouldReturnUserBookingsWithoutPagination() {
+    public void getAllUserBookings_WithValidData_ShouldReturnUserBookingsWithoutPagination() {
         LocalDateTime now = LocalDateTime.now();
         User user = new User();
         user.setName("John");
@@ -407,7 +407,7 @@ public class BookingServiceImplIntegrationTest {
     }
 
     @Test
-    void getAllUserBookings_WithValidData_ShouldReturnOwnerBookingsWithoutPagination() {
+    public void getAllUserBookings_WithValidData_ShouldReturnOwnerBookingsWithoutPagination() {
         LocalDateTime now = LocalDateTime.now();
         User user = new User();
         user.setName("John");
@@ -457,7 +457,7 @@ public class BookingServiceImplIntegrationTest {
     }
 
     @Test
-    void getAllUserBookings_withValidData_shouldReturnUserBookingsWithPagination() {
+    public void getAllUserBookings_withValidData_shouldReturnUserBookingsWithPagination() {
         LocalDateTime now = LocalDateTime.now();
         User user = new User();
         user.setName("John");
@@ -516,7 +516,7 @@ public class BookingServiceImplIntegrationTest {
     }
 
     @Test
-    void getAllUserBookings_withValidData_shouldReturnOwnerBookingsWithPagination() {
+    public void getAllUserBookings_withValidData_shouldReturnOwnerBookingsWithPagination() {
         LocalDateTime now = LocalDateTime.now();
         User user = new User();
         user.setName("John");
@@ -574,7 +574,7 @@ public class BookingServiceImplIntegrationTest {
     }
 
     @Test
-    void getAllUserBookings_withInvalidStatus_shouldThrowUnsupportedStatus() {
+    public void getAllUserBookings_withInvalidStatus_shouldThrowUnsupportedStatus() {
         String invalidStatus = "INVALID";
         User user = new User();
         user.setName("asd");
@@ -585,7 +585,7 @@ public class BookingServiceImplIntegrationTest {
     }
 
     @Test
-    void getAllUserBookings_withInvalidUserId_shouldThrowEntityNotFound() {
+    public void getAllUserBookings_withInvalidUserId_shouldThrowEntityNotFound() {
         String invalidStatus = "ALL";
         User user = new User();
         user.setName("asd");
@@ -597,7 +597,7 @@ public class BookingServiceImplIntegrationTest {
     }
 
     @Test
-    void getAllUserBookings_withInvalidPaginationRequest_shouldThrowBadRequest() {
+    public void getAllUserBookings_withInvalidPaginationRequest_shouldThrowBadRequest() {
         String status = "ALL";
         User user = new User();
         user.setName("John");

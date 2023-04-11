@@ -46,7 +46,7 @@ public class UserDtoTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenEmailIsIncorrect() {
+    public void shouldThrowExceptionWhenEmailIsIncorrect() {
         UserDto dto = new UserDto();
         dto.setId(1L);
         dto.setName("Test User");
@@ -61,7 +61,7 @@ public class UserDtoTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenEmailIsNull() {
+    public void shouldThrowExceptionWhenEmailIsNull() {
         UserDto dto = new UserDto();
         dto.setId(1L);
         dto.setName("Test User");

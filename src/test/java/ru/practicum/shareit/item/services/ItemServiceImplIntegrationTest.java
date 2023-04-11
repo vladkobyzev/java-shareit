@@ -115,7 +115,7 @@ public class ItemServiceImplIntegrationTest {
     }
 
     @Test
-    void updateItem_withInvalidUserId_shouldThrowInappropriateUser() {
+    public void updateItem_withInvalidUserId_shouldThrowInappropriateUser() {
         User user = new User();
         user.setName("John");
         user.setEmail("john@example.com");
@@ -135,7 +135,7 @@ public class ItemServiceImplIntegrationTest {
     }
 
     @Test
-    void updateItem_WithInvalidUserId_shouldThrowEntityNotFound() {
+    public void updateItem_WithInvalidUserId_shouldThrowEntityNotFound() {
         User user = new User();
         user.setName("John");
         user.setEmail("john@example.com");
@@ -155,7 +155,7 @@ public class ItemServiceImplIntegrationTest {
     }
 
     @Test
-    void createComment_WithValidData_shouldCreateComment() {
+    public void createComment_WithValidData_shouldCreateComment() {
         LocalDateTime now = LocalDateTime.now();
         User user = new User();
         user.setName("John");
@@ -189,7 +189,7 @@ public class ItemServiceImplIntegrationTest {
     }
 
     @Test
-    void createComment_WithInvalidUserId_shouldThrowBadRequestException() {
+    public void createComment_WithInvalidUserId_shouldThrowBadRequestException() {
         User user = new User();
         user.setName("John");
         user.setEmail("john@example.com");
@@ -209,7 +209,7 @@ public class ItemServiceImplIntegrationTest {
     }
 
     @Test
-    void createComment_WithEmptyText_shouldThrowBadRequestException() {
+    public void createComment_WithEmptyText_shouldThrowBadRequestException() {
         LocalDateTime now = LocalDateTime.now();
         User user = new User();
         user.setName("John");
@@ -238,7 +238,7 @@ public class ItemServiceImplIntegrationTest {
     }
 
     @Test
-    void createItem_withValidData_shouldCreateItem() {
+    public void createItem_withValidData_shouldCreateItem() {
         User user = new User();
         user.setName("John");
         user.setEmail("john@example.com");
@@ -258,7 +258,7 @@ public class ItemServiceImplIntegrationTest {
     }
 
     @Test
-    void createItem_withValidData_shouldThrowEntityNotFound() {
+    public void createItem_withValidData_shouldThrowEntityNotFound() {
         User user = new User();
         user.setName("John");
         user.setEmail("john@example.com");

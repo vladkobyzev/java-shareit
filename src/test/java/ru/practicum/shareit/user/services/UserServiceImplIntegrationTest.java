@@ -43,7 +43,7 @@ public class UserServiceImplIntegrationTest {
     }
 
     @Test
-    void createUser_ShouldThrowException_WhenEmailAlreadyExists() {
+    public void createUser_ShouldThrowException_WhenEmailAlreadyExists() {
         String existingEmail = "test@example.com";
         UserDto existingUser = new UserDto();
         existingUser.setName("test1");

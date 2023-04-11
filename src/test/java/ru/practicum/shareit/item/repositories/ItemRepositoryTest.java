@@ -64,7 +64,7 @@ class ItemRepositoryTest {
     }
 
     @Test
-    void testFindAllByOwner() {
+    public void testFindAllByOwner() {
         long ownerId = 1L;
         Item item1 = new Item();
         item1.setName("item1");
@@ -88,7 +88,7 @@ class ItemRepositoryTest {
     }
 
     @Test
-    void testFindAllByOwner_withOneItem() {
+    public void testFindAllByOwner_withOneItem() {
         long ownerId = 1L;
         Item item = new Item();
         item.setOwner(ownerId);
@@ -104,7 +104,7 @@ class ItemRepositoryTest {
     }
 
     @Test
-    void testFindAllByOwner_withDifferentOwner() {
+    public void testFindAllByOwner_withDifferentOwner() {
         long ownerId = 1L;
         Item item = new Item();
         item.setOwner(ownerId);

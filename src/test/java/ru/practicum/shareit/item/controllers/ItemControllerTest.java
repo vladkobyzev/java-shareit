@@ -27,6 +27,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith({SpringExtension.class})
 @WebMvcTest(controllers = ItemController.class)
 public class ItemControllerTest {
+    private static final String HEADER_USER_ID = "X-Sharer-User-Id";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -48,7 +50,7 @@ public class ItemControllerTest {
 
         when(itemService.getItemDtoById(eq(ITEM_ID), eq(USER_ID))).thenReturn(itemDto);
 
-        mockMvc.perform(get("/items/" + ITEM_ID).header("X-Sharer-User-Id", USER_ID))
+        mockMvc.perform(get("/items/" + ITEM_ID).header(HEADER_USER_ID, USER_ID))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is((int) ITEM_ID)))
                 .andExpect(jsonPath("$.name", is("Test item")));
@@ -69,7 +71,7 @@ public class ItemControllerTest {
 
         when(itemService.getItems(eq(USER_ID), eq(null), eq(null))).thenReturn(items);
 
-        mockMvc.perform(get("/items").header("X-Sharer-User-Id", USER_ID))
+        mockMvc.perform(get("/items").header(HEADER_USER_ID, USER_ID))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id", is((int) ITEM_ID)))
                 .andExpect(jsonPath("$[0].name", is("Test item 1")))
@@ -111,7 +113,7 @@ public class ItemControllerTest {
         when(itemService.createItem(eq(itemDto), anyLong())).thenReturn(itemDto);
 
         mockMvc.perform(post("/items")
-                        .header("X-Sharer-User-Id", 1L)
+                        .header(HEADER_USER_ID, 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(itemDto)))
                 .andExpect(status().isOk())
@@ -126,7 +128,7 @@ public class ItemControllerTest {
         itemDto.setName("");
 
         mockMvc.perform(post("/items")
-                        .header("X-Sharer-User-Id", 1L)
+                        .header(HEADER_USER_ID, 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(itemDto)))
                 .andExpect(status().isBadRequest())
@@ -142,7 +144,7 @@ public class ItemControllerTest {
         when(itemService.createComment(eq(commentDto), anyLong(), anyLong())).thenReturn(commentDto);
 
         mockMvc.perform(post("/items/1/comment")
-                        .header("X-Sharer-User-Id", 1L)
+                        .header(HEADER_USER_ID, 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(commentDto)))
                 .andExpect(status().isOk())
@@ -160,7 +162,7 @@ public class ItemControllerTest {
         when(itemService.updateItem(eq(itemDto), anyLong(), anyLong())).thenReturn(itemDto);
 
         mockMvc.perform(patch("/items/1")
-                        .header("X-Sharer-User-Id", 1L)
+                        .header(HEADER_USER_ID, 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(itemDto)))
                 .andExpect(status().isOk())
@@ -173,7 +175,7 @@ public class ItemControllerTest {
     @Test
     public void testDeleteItem_Success() {
         mockMvc.perform(delete("/items/1")
-                        .header("X-Sharer-User-Id", 1L)
+                        .header(HEADER_USER_ID, 1L)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();

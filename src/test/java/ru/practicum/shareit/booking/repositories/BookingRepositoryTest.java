@@ -33,7 +33,7 @@ class BookingRepositoryTest {
     private ItemRepository itemRepository;
 
     @Test
-    void testFindAllUserBookingsByState() {
+    public void testFindAllUserBookingsByState() {
         User user = new User();
         user.setName("John Doe");
         user.setEmail("johndoe@example.com");
@@ -83,7 +83,7 @@ class BookingRepositoryTest {
     }
 
     @Test
-    void testFindAllOwnerBookingsByState() {
+    public void testFindAllOwnerBookingsByState() {
         User user = new User();
         user.setName("John Doe");
         user.setEmail("johndoe@example.com");
@@ -143,7 +143,7 @@ class BookingRepositoryTest {
     }
 
     @Test
-    void testFindAllUserBookingsByStateWithPagination() {
+    public void testFindAllUserBookingsByStateWithPagination() {
         User user = new User();
         user.setName("John Doe");
         user.setEmail("johndoe@example.com");
@@ -186,7 +186,7 @@ class BookingRepositoryTest {
     }
 
     @Test
-    void testFindAllOwnerBookingsByStateWithPagination() {
+    public void testFindAllOwnerBookingsByStateWithPagination() {
         User user = new User();
         user.setName("John Doe");
         user.setEmail("johndoe@example.com");
@@ -420,7 +420,7 @@ class BookingRepositoryTest {
     }
 
     @Test
-    void testExistsBookingByBooker_IdAndItem_IdAndStatusAndStartBefore_shouldReturnTrue() {
+    public void testExistsBookingByBooker_IdAndItem_IdAndStatusAndStartBefore_shouldReturnTrue() {
         LocalDateTime startDate = LocalDateTime.now().minusDays(1);
 
         User user = new User();
@@ -446,7 +446,7 @@ class BookingRepositoryTest {
     }
 
     @Test
-    void testExistsBookingByBooker_IdAndItem_IdAndStatusAndStartBefore_shouldReturnFalse() {
+    public void testExistsBookingByBooker_IdAndItem_IdAndStatusAndStartBefore_shouldReturnFalse() {
         long userId = 1L;
         long itemId = 2L;
         LocalDateTime startDate = LocalDateTime.now().plusDays(1);

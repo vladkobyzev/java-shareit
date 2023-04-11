@@ -22,7 +22,7 @@ class RequestRepositoryTest {
     private RequestRepository requestRepository;
 
     @Test
-    void testFindAllByOwner_ShouldReturnAllItemsWithOwnerId() {
+    public void testFindAllByOwner_ShouldReturnAllItemsWithOwnerId() {
         long ownerId = 1L;
         ItemRequest itemRequest1 = new ItemRequest();
         itemRequest1.setId(1L);
@@ -45,7 +45,7 @@ class RequestRepositoryTest {
     }
 
     @Test
-    void testFindAllByOwner_ShouldReturnEmptyListWhenNoItemsFound() {
+    public void testFindAllByOwner_ShouldReturnEmptyListWhenNoItemsFound() {
         long ownerId = 1L;
 
         List<ItemRequest> itemRequests = requestRepository.findAllByOwner(ownerId);
@@ -54,7 +54,7 @@ class RequestRepositoryTest {
     }
 
     @Test
-    void testFindAllByOwnerNot_ShouldReturnRequestsExceptForUser() {
+    public void testFindAllByOwnerNot_ShouldReturnRequestsExceptForUser() {
         long ownerId = 1L;
         ItemRequest request1 = new ItemRequest();
         request1.setId(1L);
@@ -75,7 +75,7 @@ class RequestRepositoryTest {
     }
 
     @Test
-    void testFindAllByOwnerNot_ShouldReturnEmptyListIfAllRequestsBelongToUser() {
+    public void testFindAllByOwnerNot_ShouldReturnEmptyListIfAllRequestsBelongToUser() {
         long ownerId = 1L;
         ItemRequest request1 = new ItemRequest();
         request1.setId(1L);
@@ -96,7 +96,7 @@ class RequestRepositoryTest {
     }
 
     @Test
-    void testFindAllByOwnerNot_ShouldReturnEmptyListIfNoRequests() {
+    public void testFindAllByOwnerNot_ShouldReturnEmptyListIfNoRequests() {
         long ownerId = 1L;
 
         Pageable pageable = PageRequest.of(0, 10, Sort.by("created").ascending());

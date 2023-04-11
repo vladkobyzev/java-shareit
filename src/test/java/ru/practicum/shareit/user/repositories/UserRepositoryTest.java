@@ -18,7 +18,7 @@ class UserRepositoryTest {
     private UserRepository userRepository;
 
     @Test
-    void findByEmail_shouldReturnOptional() {
+    public void findByEmail_shouldReturnOptional() {
         User user = new User();
         user.setName("test1");
         user.setEmail("test1@example.com");
@@ -30,7 +30,7 @@ class UserRepositoryTest {
     }
 
     @Test
-    void findByEmail_shouldReturnEmpty() {
+    public void findByEmail_shouldReturnEmpty() {
         Optional<User> savedUser = userRepository.findByEmail("test1@example.com");
 
         assertTrue(savedUser.isEmpty());

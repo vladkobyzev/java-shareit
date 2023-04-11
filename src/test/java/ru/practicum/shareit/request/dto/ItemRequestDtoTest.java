@@ -19,7 +19,7 @@ public class ItemRequestDtoTest {
     private JacksonTester<ItemRequestDto> json;
 
     @Test
-    void serializeJson() throws Exception {
+    public void serializeJson() throws Exception {
         ItemRequestDto itemRequestDto = new ItemRequestDto();
         itemRequestDto.setId(1L);
         itemRequestDto.setDescription("test description");
@@ -50,7 +50,7 @@ public class ItemRequestDtoTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenDescriptionIsNull() {
+    public void shouldThrowExceptionWhenDescriptionIsNull() {
         ItemRequestDto itemRequestDto = new ItemRequestDto();
         itemRequestDto.setDescription(null);
 

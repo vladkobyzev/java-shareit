@@ -116,7 +116,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void createUser_InvalidDto() throws Exception {
+    public void createUser_InvalidDto() throws Exception {
         UserDto userDto = new UserDto();
 
         mockMvc.perform(post("/users")

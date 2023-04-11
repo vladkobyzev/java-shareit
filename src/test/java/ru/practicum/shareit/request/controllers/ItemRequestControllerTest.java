@@ -30,6 +30,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith({SpringExtension.class})
 @WebMvcTest(controllers = ItemRequestController.class)
 public class ItemRequestControllerTest {
+    private static final String USER_ID = "X-Sharer-User-Id";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -48,7 +50,7 @@ public class ItemRequestControllerTest {
         when(requestService.createRequest(requestDto, userId)).thenReturn(requestDto);
 
         mockMvc.perform(post("/requests")
-                        .header("X-Sharer-User-Id", userId)
+                        .header(USER_ID, userId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isOk())
@@ -75,7 +77,7 @@ public class ItemRequestControllerTest {
         when(requestService.getOwnerRequests(ownerId)).thenReturn(requestList);
 
         MvcResult mvcResult = mockMvc.perform(get("/requests")
-                        .header("X-Sharer-User-Id", ownerId)
+                        .header(USER_ID, ownerId)
                         .param("from", String.valueOf(from))
                         .param("size", String.valueOf(size)))
                 .andReturn();
@@ -105,7 +107,7 @@ public class ItemRequestControllerTest {
         when(requestService.getUserRequests(userId, from, size)).thenReturn(requestList);
 
         MvcResult mvcResult = mockMvc.perform(get("/requests/all")
-                        .header("X-Sharer-User-Id", userId)
+                        .header(USER_ID, userId)
                         .param("from", String.valueOf(from))
                         .param("size", String.valueOf(size)))
                 .andReturn();
@@ -128,7 +130,7 @@ public class ItemRequestControllerTest {
         when(requestService.getRequestById(requestId, userId)).thenReturn(requestDto);
 
         mockMvc.perform(get("/requests/{requestId}", requestId)
-                        .header("X-Sharer-User-Id", userId))
+                        .header(USER_ID, userId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is((int) requestId)));
     }
@@ -141,7 +143,7 @@ public class ItemRequestControllerTest {
         when(requestService.getRequestById(requestId, userId)).thenThrow(new EntityNotFound("Entity not found"));
 
         mockMvc.perform(get("/requests/{requestId}", requestId)
-                        .header("X-Sharer-User-Id", userId))
+                        .header(USER_ID, userId))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message", is("Entity not found")));
     }

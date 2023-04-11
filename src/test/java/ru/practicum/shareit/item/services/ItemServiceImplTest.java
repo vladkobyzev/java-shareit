@@ -34,25 +34,25 @@ import static org.mockito.Mockito.*;
 @ExtendWith({MockitoExtension.class})
 class ItemServiceImplTest {
     @Mock
-    ItemRepository itemRepository;
+    private ItemRepository itemRepository;
 
     @Mock
-    BookingRepository bookingRepository;
+    private BookingRepository bookingRepository;
 
     @Mock
-    UserService userService;
+    private UserService userService;
 
     @Mock
-    CommentRepository commentRepository;
+    private CommentRepository commentRepository;
 
     @Mock
-    ModelMapper modelMapper;
+    private ModelMapper modelMapper;
 
     @InjectMocks
-    ItemServiceImpl itemService;
+    private ItemServiceImpl itemService;
 
     @Test
-    void updateItem_WithValidData_ShouldUpdateItemDescription() {
+    public void updateItem_WithValidData_ShouldUpdateItemDescription() {
         long itemId = 1L;
         long userId = 2L;
         ItemDto itemDto = new ItemDto();
@@ -80,7 +80,7 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void updateItem_WithValidData_ShouldUpdateItemName() {
+    public void updateItem_WithValidData_ShouldUpdateItemName() {
         long itemId = 1L;
         long userId = 2L;
         ItemDto itemDto = new ItemDto();
@@ -108,7 +108,7 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void updateItem_WithValidData_ShouldUpdateItemAvailable() {
+    public void updateItem_WithValidData_ShouldUpdateItemAvailable() {
         long itemId = 1L;
         long userId = 2L;
         ItemDto itemDto = new ItemDto();
@@ -138,7 +138,7 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void testUpdateItem_shouldThrowInappropriateUserException() {
+    public void testUpdateItem_shouldThrowInappropriateUserException() {
         long itemId = 1L;
         long userId = 2L;
         ItemDto itemDto = new ItemDto();

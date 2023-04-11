@@ -42,7 +42,7 @@ class ItemRequestServiceImplTest {
 
 
     @Test
-    void testCreateRequestSuccess() {
+    public void testCreateRequestSuccess() {
         long userId = 1L;
         ItemRequestDto requestDto = new ItemRequestDto();
         requestDto.setId(1L);
@@ -67,7 +67,7 @@ class ItemRequestServiceImplTest {
     }
 
     @Test
-    void testCreateRequestWithInvalidUserId() {
+    public void testCreateRequestWithInvalidUserId() {
         long userId = 1000L;
         ItemRequestDto requestDto = new ItemRequestDto();
         requestDto.setDescription("Test Description");

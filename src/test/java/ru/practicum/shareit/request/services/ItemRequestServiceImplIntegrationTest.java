@@ -32,7 +32,7 @@ class ItemRequestServiceImplIntegrationTest {
     private RequestRepository itemRequestRepository;
 
     @Test
-    void shouldCreateRequest_success() {
+    public void shouldCreateRequest_success() {
         User user = new User();
         user.setName("John Doe");
         user.setEmail("johndoe@example.com");
@@ -57,7 +57,7 @@ class ItemRequestServiceImplIntegrationTest {
     }
 
     @Test
-    void shouldCreateRequest_withInvalidUserId_shouldThrowEntityNotFound() {
+    public void shouldCreateRequest_withInvalidUserId_shouldThrowEntityNotFound() {
         User invalidUser = new User();
         invalidUser.setId(1L);
 
@@ -69,7 +69,7 @@ class ItemRequestServiceImplIntegrationTest {
     }
 
     @Test
-    void getRequestById_validId_shouldReturnsRequest() {
+    public void getRequestById_validId_shouldReturnsRequest() {
         User user = new User();
         user.setName("John");
         user.setEmail("johndoe@example.com");
@@ -90,7 +90,7 @@ class ItemRequestServiceImplIntegrationTest {
     }
 
     @Test
-    void getRequestById_InvalidRequestId_ThrowsEntityNotFound() {
+    public void getRequestById_InvalidRequestId_ThrowsEntityNotFound() {
         long invalidId = 100L;
         User user = new User();
         user.setName("John");
@@ -101,7 +101,7 @@ class ItemRequestServiceImplIntegrationTest {
     }
 
     @Test
-    void getRequestById_InvalidUserId_ThrowsEntityNotFound() {
+    public void getRequestById_InvalidUserId_ThrowsEntityNotFound() {
         long requestId = 1L;
         long invalidUserId = 100L;
         User user = new User();
@@ -119,7 +119,7 @@ class ItemRequestServiceImplIntegrationTest {
     }
 
     @Test
-    void testGetOwnerRequests() {
+    public void testGetOwnerRequests() {
         User user = new User();
         user.setName("Test User");
         user.setEmail("test@example.com");
@@ -153,7 +153,7 @@ class ItemRequestServiceImplIntegrationTest {
     }
 
     @Test
-    void getOwnerRequests_withInvalidOwnerId_shouldThrowEntityNotFound() {
+    public void getOwnerRequests_withInvalidOwnerId_shouldThrowEntityNotFound() {
         long ownerId = 1L;
         ItemRequest request1 = new ItemRequest();
         request1.setId(1L);
