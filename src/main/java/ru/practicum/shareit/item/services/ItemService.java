@@ -11,7 +11,7 @@ public interface ItemService {
 
     Item getItemById(long itemId);
 
-    List<ItemDto> getItems(long userId);
+    List<ItemDto> getItems(long userId, Integer from, Integer size);
 
     void deleteItem(long id);
 

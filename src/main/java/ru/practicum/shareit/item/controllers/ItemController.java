@@ -28,8 +28,10 @@ public class ItemController {
     }
 
     @GetMapping()
-    public List<ItemDto> getItems(@RequestHeader(value = USER_ID) long userId) {
-        return itemService.getItems(userId);
+    public List<ItemDto> getItems(@RequestHeader(value = USER_ID) long userId,
+                                  @RequestParam(name = "from", required = false) Integer from,
+                                  @RequestParam(name = "size", required = false) Integer size) {
+        return itemService.getItems(userId, from, size);
     }
 
     @GetMapping("/search")

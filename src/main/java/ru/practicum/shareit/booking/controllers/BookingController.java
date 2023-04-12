@@ -28,16 +28,20 @@ public class BookingController {
 
     @GetMapping()
     public List<SentBookingDto> getAllUserBookings(@RequestHeader(value = USER_ID) long userId,
+                                                   @RequestParam(name = "from", required = false) Integer from,
+                                                   @RequestParam(name = "size", required = false) Integer size,
                                                    @RequestParam(name = "state", required = false, defaultValue = "ALL")
                                                    String state) {
-        return bookingService.getAllUserBookings(userId, state, "USER");
+        return bookingService.getAllUserBookings(userId, state, "USER", from, size);
     }
 
     @GetMapping("/owner")
     public List<SentBookingDto> getAllOwnerBookings(@RequestHeader(value = USER_ID) long userId,
+                                                    @RequestParam(name = "from", required = false) Integer from,
+                                                    @RequestParam(name = "size", required = false) Integer size,
                                                     @RequestParam(name = "state",
                                                             required = false, defaultValue = "ALL") String state) {
-        return bookingService.getAllUserBookings(userId, state, "OWNER");
+        return bookingService.getAllUserBookings(userId, state, "OWNER", from, size);
     }
 
     @PostMapping()

@@ -23,5 +23,6 @@ public class ItemDto {
 
     private Set<Comment> comments;
 
+    private Long requestId;
 
 }
