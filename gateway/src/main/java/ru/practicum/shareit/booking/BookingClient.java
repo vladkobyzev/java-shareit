@@ -8,9 +8,9 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.shareit.booking.dto.BookItemRequestDto;
-import ru.practicum.shareit.booking.dto.BookingState;
 import ru.practicum.shareit.client.BaseClient;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -27,21 +27,53 @@ public class BookingClient extends BaseClient {
         );
     }
 
-    public ResponseEntity<Object> getBookings(long userId, BookingState state, Integer from, Integer size) {
-        Map<String, Object> parameters = Map.of(
-                "state", state.name(),
-                "from", from,
-                "size", size
-        );
-        return get("?state={state}&from={from}&size={size}", userId, parameters);
+    public ResponseEntity<Object> getAllUserBookings(long userId, String state, Integer from, Integer size) {
+        StringBuilder pathBuilder = new StringBuilder();
+        Map<String, Object> parameters = new HashMap<>();
+
+        setParameters(pathBuilder, parameters, state, from, size);
+
+        String path = pathBuilder.toString();
+        return get(path, userId, parameters);
     }
 
 
-    public ResponseEntity<Object> bookItem(long userId, BookItemRequestDto requestDto) {
+    public ResponseEntity<Object> createBooking(long userId, BookItemRequestDto requestDto) {
         return post("", userId, requestDto);
     }
 
     public ResponseEntity<Object> getBooking(long userId, Long bookingId) {
         return get("/" + bookingId, userId);
+    }
+
+    public ResponseEntity<Object> getOwnerBookings(long userId, String state, Integer from, Integer size) {
+        StringBuilder pathBuilder = new StringBuilder("/owner");
+        Map<String, Object> parameters = new HashMap<>();
+
+        setParameters(pathBuilder, parameters, state, from, size);
+
+        String path = pathBuilder.toString();
+        return get(path, userId, parameters);
+    }
+
+    public ResponseEntity<Object> updateBookingStatus(long bookingId, String approved, long userId) {
+        Map<String, Object> parameters = Map.of(
+                "approved", approved
+        );
+        return patch("/" + bookingId + "?approved={approved}", userId, parameters, null);
+    }
+
+    private void setParameters(StringBuilder pathBuilder, Map<String, Object> parameters, String state, Integer from, Integer size) {
+        if (state != null) {
+            pathBuilder.append("?state={state}");
+            parameters.put("state", state);
+        }
+
+        if (from != null && size != null) {
+            String separator = pathBuilder.toString().contains("?") ? "&" : "?";
+            pathBuilder.append(separator).append("from={from}&size={size}");
+            parameters.put("from", from);
+            parameters.put("size", size);
+        }
     }
 }
